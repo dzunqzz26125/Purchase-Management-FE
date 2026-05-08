@@ -1,0 +1,103 @@
+:root {
+  /* Primary */
+  --color-primary: #00236f;
+  --color-primary-container: #1e3a8a;
+  --color-primary-fixed: #dce1ff;
+  --color-primary-fixed-dim: #b6c4ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #90a8ff;
+
+  /* Secondary */
+  --color-secondary: #50616b;
+  --color-secondary-container: #d3e5f1;
+  --color-secondary-fixed: #d3e5f1;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #566771;
+
+  /* Tertiary */
+  --color-tertiary: #1e2d28;
+  --color-tertiary-fixed: #d5e6df;
+  --color-on-tertiary: #ffffff;
+
+  /* Surface */
+  --color-background: #f7f9fb;
+  --color-surface: #f7f9fb;
+  --color-surface-container: #eceef0;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+
+  /* Text */
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #444651;
+
+  /* Outline */
+  --color-outline: #757682;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Shadow */
+  --shadow-card: 0 10px 30px -5px rgba(30, 58, 138, 0.05);
+  --shadow-lg: 0 20px 50px -10px rgba(30, 58, 138, 0.1);
+
+  /* Spacing */
+  --container-padding: 32px;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.container {
+  max-width: 1280px;
+  margin: auto;
+  padding: 0 var(--container-padding);
+}
+
+.section {
+  padding: 80px 0;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--color-primary);
+  border: 1px solid var(--color-surface-container);
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
