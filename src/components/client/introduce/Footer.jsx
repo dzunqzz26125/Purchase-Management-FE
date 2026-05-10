@@ -1,22 +1,31 @@
 const FooterIntro = () => {
   return (
-    <footer className="border-t border-surface-container py-10">
-      <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="text-xl font-bold text-primary">LogiFlow</div>
-
-        <div className="flex gap-6 text-secondary">
-          <a href="#" className="hover:text-primary">
+    <footer className="py-lg px-container-padding border-t border-surface-container">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+        <div className="font-h3 text-h3 font-bold text-primary">LogiFlow</div>
+        <div className="flex gap-lg">
+          <a
+            className="text-label-sm font-label-sm text-secondary hover:text-primary"
+            href="#"
+          >
             Điều khoản
           </a>
-          <a href="#" className="hover:text-primary">
+          <a
+            className="text-label-sm font-label-sm text-secondary hover:text-primary"
+            href="#"
+          >
             Bảo mật
           </a>
-          <a href="#" className="hover:text-primary">
+          <a
+            className="text-label-sm font-label-sm text-secondary hover:text-primary"
+            href="#"
+          >
             Hỗ trợ
           </a>
         </div>
-
-        <p className="text-xs text-secondary">© 2024 LogiFlow WMS</p>
+        <p className="text-label-xs font-label-xs text-secondary">
+          © 2026 LogiFlow WMS. All rights reserved.
+        </p>
       </div>
     </footer>
   );
