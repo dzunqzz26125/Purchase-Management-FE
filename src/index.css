@@ -77,6 +77,16 @@
   --text-label-xs--font-weight: 600;
 }
 
+.btn-filter {
+  @apply px-md py-sm bg-surface-container-lowest border rounded-xl text-secondary;
+}
+.btn-primary {
+  @apply px-md py-sm bg-primary text-white rounded-xl;
+}
+.btn-secondary {
+  @apply px-md py-sm bg-secondary-container text-primary rounded-xl;
+}
+
 @layer base {
   * {
     margin: 0;

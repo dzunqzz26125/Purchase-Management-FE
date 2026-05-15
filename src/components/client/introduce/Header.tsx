@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const HeaderIntro = () => {
   return (
     <header className="sticky top-0 z-40 flex justify-between items-center w-full px-md py-xs bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-[0_10px_30px_-5px_rgba(30,58,138,0.05)]">
@@ -34,10 +36,14 @@ const HeaderIntro = () => {
       </div>
       <div className="flex items-center gap-sm">
         <button className="px-md py-xs font-label-sm text-label-sm text-primary hover:bg-surface-container-low rounded-lg transition-all">
-          Đăng nhập
+          <Link to="/login">
+            Đăng nhập
+          </Link>
         </button>
         <button className="px-md py-xs font-label-sm text-label-sm bg-primary text-on-primary rounded-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95">
-          Đăng ký ngay
+          <Link to="/register">
+            Đăng ký ngay
+          </Link>
         </button>
       </div>
     </header>

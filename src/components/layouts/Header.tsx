@@ -1,13 +1,13 @@
 const Topbar = () => {
   return (
     <header className="sticky top-0 z-40 flex w-full items-center justify-between bg-surface/80 px-md py-xs shadow-[0_10px_30px_-5px_rgba(30,58,138,0.05)] backdrop-blur-md">
-      <div className="flex max-w-xl flex-1 items-center">
-        <div className="relative w-full overflow-hidden rounded-xl bg-surface-container-low transition-all duration-200 focus-within:ring-2 focus-within:ring-primary-container">
+      <div className="flex max-w-100 flex-1 items-center">
+        <div className="relative w-100 overflow-hidden rounded-xl bg-surface-container-low transition-all duration-200 focus-within:ring-2 focus-within:ring-primary-container">
           <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-secondary">
             search
           </span>
           <input
-            className="w-full border-none bg-transparent py-xs pl-xl pr-md text-body-md focus:ring-0"
+            className="bg-transparent w-full min-w-[320px] border-none pl-xl pr-2 py-sm text-body-md placeholder:text-outline outline-none focus:outline-none focus:ring-0"
             placeholder="Tìm kiếm hàng hóa, đơn hàng..."
             type="text"
           />
