@@ -62,14 +62,14 @@ export default function ProductFormModal({
   });
 
   return (
-    <motionless className="fixed inset-0 z-50 flex items-center justify-center p-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-md">
       <button
         type="button"
         className="absolute inset-0 bg-on-surface/40"
         onClick={onClose}
         aria-label="Đóng"
       />
-      <motionless className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-container-lowest rounded-3xl shadow-xl border border-surface-container">
+      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-container-lowest rounded-3xl shadow-xl border border-surface-container">
         <div className="sticky top-0 bg-surface-container-lowest border-b border-surface-container px-md py-md flex items-center justify-between">
           <h2 className="text-h3 font-semibold">
             {mode === "create" ? "Thêm sản phẩm mới" : "Chỉnh sửa sản phẩm"}
@@ -79,25 +79,24 @@ export default function ProductFormModal({
             onClick={onClose}
             className="p-xs text-secondary hover:text-primary rounded-lg"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined cursor-pointer">close</span>
           </button>
-        </motionless>
+        </div>
 
         <form onSubmit={submit} className="p-md space-y-md">
-          <motionless className="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <motionless className="space-y-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div className="space-y-xs md:col-span-2">
               <label className={labelClass}>SKU *</label>
               <input
                 className={fieldClass}
-                disabled={mode === "edit"}
                 {...register("sku", { required: "Vui lòng nhập SKU" })}
               />
               {errors.sku && (
                 <p className="text-error text-label-xs">{errors.sku.message}</p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Tên sản phẩm *</label>
               <input
                 className={fieldClass}
@@ -109,9 +108,9 @@ export default function ProductFormModal({
               {errors.name && (
                 <p className="text-error text-label-xs">{errors.name.message}</p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Phân loại *</label>
               <select
                 className={fieldClass}
@@ -131,9 +130,9 @@ export default function ProductFormModal({
                   {errors.categoryId.message}
                 </p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Đơn vị tính *</label>
               <input
                 className={fieldClass}
@@ -143,9 +142,9 @@ export default function ProductFormModal({
               {errors.unit && (
                 <p className="text-error text-label-xs">{errors.unit.message}</p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Giá vốn (VND) *</label>
               <input
                 type="number"
@@ -162,9 +161,9 @@ export default function ProductFormModal({
                   {errors.costPrice.message}
                 </p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Giá bán (VND) *</label>
               <input
                 type="number"
@@ -181,9 +180,9 @@ export default function ProductFormModal({
                   {errors.sellPrice.message}
                 </p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Tồn kho *</label>
               <input
                 type="number"
@@ -198,9 +197,9 @@ export default function ProductFormModal({
               {errors.stock && (
                 <p className="text-error text-label-xs">{errors.stock.message}</p>
               )}
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs">
+            <div className="space-y-xs">
               <label className={labelClass}>Tồn kho tối thiểu (cảnh báo)</label>
               <input
                 type="number"
@@ -211,30 +210,30 @@ export default function ProductFormModal({
                   valueAsNumber: true,
                 })}
               />
-            </motionless>
+            </div>
 
-            <motionless className="space-y-xs md:col-span-2">
+            <div className="space-y-xs md:col-span-2">
               <label className={labelClass}>URL ảnh sản phẩm</label>
               <input
                 className={fieldClass}
                 placeholder="https://..."
                 {...register("imageUrl")}
               />
-            </motionless>
-          </motionless>
+            </div>
+          </div>
 
-          <motionless className="flex justify-end gap-sm pt-sm border-t border-surface-container">
+          <div className="flex justify-end gap-sm pt-sm border-t border-surface-container">
             <button
               type="button"
               onClick={onClose}
-              className="px-md py-sm rounded-xl border border-surface-container text-secondary hover:bg-surface-container transition-all"
+              className="px-md py-sm cursor-pointer rounded-xl border border-surface-container text-secondary hover:bg-surface-container transition-all"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-md py-sm bg-primary text-on-primary rounded-xl font-label-sm disabled:opacity-60 flex items-center gap-xs"
+              className="px-md py-sm cursor-pointer bg-primary text-on-primary rounded-xl font-label-sm disabled:opacity-60 flex items-center gap-xs"
             >
               {loading && (
                 <span className="material-symbols-outlined animate-spin text-[18px]">
@@ -243,20 +242,9 @@ export default function ProductFormModal({
               )}
               {mode === "create" ? "Thêm sản phẩm" : "Lưu thay đổi"}
             </button>
-          </motionless>
+          </div>
         </form>
-      </motionless>
-    </motionless>
+      </div>
+    </div>
   );
-}
-
-// Avoid invalid HTML tag names from typo - use div
-function motionless({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return <motionless className={className}>{children}</motionless>;
 }

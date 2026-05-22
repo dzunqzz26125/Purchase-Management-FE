@@ -1,11 +1,28 @@
+import { NavLink, useNavigate } from "react-router-dom";
+import api from "../../api/client";
+import { clearAccessToken } from "../../api/client";
+
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   const menu = [
-    { icon: "dashboard", label: "Dashboard", active: true },
-    { icon: "inventory_2", label: "Inventory" },
-    { icon: "swap_horiz", label: "Stock Movements" },
-    { icon: "analytics", label: "Reporting" },
-    { icon: "map", label: "Warehouse Map" },
+    { icon: "dashboard", link: "/app/dashboard", label: "Dashboard" },
+    { icon: "inventory_2", link: "/app/inventory", label: "Tồn kho" },
+    { icon: "input", link: "/app/po", label: "Nhập kho (PO)" },
+    { icon: "output", link: "/app/so", label: "Xuất kho (SO)" },
+    { icon: "groups", link: "/app/providers", label: "Nhà cung cấp" },
+    { icon: "analytics", link: "/app/report", label: "Báo cáo" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      /* ignore */
+    }
+    clearAccessToken();
+    navigate("/login");
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-surface-container bg-surface-bright py-md">
@@ -21,53 +38,52 @@ const Sidebar = () => {
           </div>
           <div>
             <h2 className="text-[18px] font-bold text-primary">LogiFlow</h2>
-            <p className="text-label-xs text-secondary">Central Hub</p>
+            <p className="text-label-xs text-secondary">WMS</p>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1">
-        {menu.map((item, i) => (
-          <a
-            key={i}
-            href="#"
-            className={`mx-xs flex items-center gap-sm rounded-lg px-sm py-xs transition-colors duration-150 ${
-              item.active
-                ? "bg-secondary-container font-semibold text-primary"
-                : "text-secondary hover:bg-surface-container-high"
-            }`}
+        {menu.map((item) => (
+          <NavLink
+            to={item.link}
+            key={item.link}
+            className={({ isActive }) =>
+              `mx-xs flex items-center gap-sm rounded-lg px-sm py-xs transition-colors duration-150 ${
+                isActive
+                  ? "bg-secondary-container font-semibold text-primary"
+                  : "text-secondary hover:bg-surface-container-high"
+              }`
+            }
           >
-            <span
-              className="material-symbols-outlined"
-              style={
-                item.active ? { fontVariationSettings: "'FILL' 1" } : undefined
-              }
-            >
-              {item.icon}
-            </span>
-            <span className="text-label-sm">{item.label}</span>
-          </a>
+            {({ isActive }) => (
+              <>
+                <span
+                  className="material-symbols-outlined"
+                  style={
+                    isActive
+                      ? { fontVariationSettings: "'FILL' 1" }
+                      : undefined
+                  }
+                >
+                  {item.icon}
+                </span>
+                <span className="text-label-sm">{item.label}</span>
+              </>
+            )}
+          </NavLink>
         ))}
       </nav>
-      <div className="mt-auto space-y-1 px-xs">
-        <button className="mb-md flex w-full items-center justify-center gap-xs rounded-xl bg-primary py-sm text-label-sm text-on-primary shadow-lg transition-all hover:opacity-90 active:scale-95">
-          <span className="material-symbols-outlined text-[20px]">add</span>
-          Add New SKU
-        </button>
-        <a
-          className="flex items-center gap-sm rounded-lg px-sm py-xs text-secondary transition-colors duration-150 hover:bg-surface-container-high"
-          href="#"
-        >
-          <span className="material-symbols-outlined">help</span>
-          <span className="text-label-sm">Help Center</span>
-        </a>
-        <a
-          className="flex items-center gap-sm rounded-lg px-sm py-xs text-secondary transition-colors duration-150 hover:bg-surface-container-high"
-          href="#"
+
+      <div className="mt-auto px-xs">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-sm rounded-lg px-sm py-xs text-secondary transition-colors hover:bg-surface-container-high"
         >
           <span className="material-symbols-outlined">logout</span>
-          <span className="text-label-sm">Logout</span>
-        </a>
+          <span className="text-label-sm">Đăng xuất</span>
+        </button>
       </div>
     </aside>
   );

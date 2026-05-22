@@ -1,14 +1,23 @@
 import type {
+  Category,
   Product,
   ProductTableItem,
   StockStatus,
 } from "../types/product";
 
-export const getCategoryName = (product: Product): string => {
+export const getCategoryName = (
+  product: Product,
+  categories: Category[],
+): string => {
+  // case 1: backend đã populate
   if (typeof product.categoryId === "object" && product.categoryId?.name) {
     return product.categoryId.name;
   }
-  return "—";
+
+  // case 2: chỉ có ID → map sang categories
+  const category = categories.find((c) => c._id === product.categoryId);
+
+  return category?.name || "—";
 };
 
 export const getCategoryId = (product: Product): string => {
@@ -28,11 +37,14 @@ export const getStockStatus = (
   return "ok";
 };
 
-export const toTableItem = (product: Product): ProductTableItem => ({
+export const toTableItem = (
+  product: Product,
+  categories: Category[],
+): ProductTableItem => ({
   _id: product._id,
   sku: product.sku,
   name: product.name,
-  category: getCategoryName(product),
+  category: getCategoryName(product, categories),
   categoryId: getCategoryId(product),
   stock: product.stock,
   minStock: product.minStock,

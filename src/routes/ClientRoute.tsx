@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import IntroducePage from "../pages/introducePage";
 import ProtectedRoute from "./ProtectedRoute";
 import Signup from "../pages/RegisterPage";
@@ -8,6 +8,8 @@ import Dashboard from "../pages/Dashboard";
 import Inventory from "../pages/InventoryPage";
 import InboundPage from "../pages/PO-Page";
 import OutboundPage from "../pages/SO-Page";
+import ReportPage from "../pages/ReportPage";
+import ProvidersPage from "../pages/ProvidersPage";
 
 const routes = createBrowserRouter([
   { path: "/", element: <IntroducePage /> },
@@ -19,10 +21,13 @@ const routes = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <Dashboard /> },
       { path: "inventory", element: <Inventory /> },
       { path: "po", element: <InboundPage /> },
       { path: "so", element: <OutboundPage /> },
+      { path: "providers", element: <ProvidersPage /> },
+      { path: "report", element: <ReportPage /> },
     ],
   },
   { path: "/register", element: <Signup /> },
