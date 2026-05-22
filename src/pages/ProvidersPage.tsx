@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ProviderTable from "../components/client/providers/ProviderTable";
+import CustomerTable from "../components/client/customers/CustomerTable";
 import ProviderFormModal from "../feat/provider/ProviderFormModal";
+import CustomerFormModal from "../feat/customer/CustomerFormModal";
 import { paymentApi } from "../api/paymentApi";
 import { providerApi } from "../api/providerApi";
 import { customerApi } from "../api/customerApi";
 import { useCrud } from "../hooks/useCrud";
 import { useAppStore } from "../store/useAppStore";
 import type { Provider, ProviderFormValues } from "../types/provider";
+import type { CustomerFormValues } from "../types/customer";
 
 const ProvidersPage = () => {
   const queryClient = useQueryClient();
@@ -19,6 +22,13 @@ const ProvidersPage = () => {
   );
   const [partyId, setPartyId] = useState("");
   const [amount, setAmount] = useState(0);
+  const [customerModalOpen, setCustomerModalOpen] = useState(false);
+  const [customerModalMode, setCustomerModalMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(
+    null,
+  );
 
   const {
     items: providers,
@@ -35,9 +45,42 @@ const ProvidersPage = () => {
     remove: providerApi.remove,
   });
 
-  const { data: customers = [] } = useQuery({
+  const {
+    data: customers = [],
+    isLoading: customersLoading,
+    refetch: refetchCustomers,
+  } = useQuery({
     queryKey: ["customers", "list"],
     queryFn: customerApi.list,
+  });
+
+  const createCustomerMutation = useMutation({
+    mutationFn: customerApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      setCustomerModalOpen(false);
+    },
+  });
+
+  const updateCustomerMutation = useMutation({
+    mutationFn: ({
+      id,
+      values,
+    }: {
+      id: string;
+      values: CustomerFormValues;
+    }) => customerApi.update(id, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      setCustomerModalOpen(false);
+    },
+  });
+
+  const deleteCustomerMutation = useMutation({
+    mutationFn: customerApi.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
   });
 
   const payMutation = useMutation({
@@ -55,6 +98,11 @@ const ProvidersPage = () => {
     [providers, providerModal.resourceId],
   );
 
+  const editingCustomer = useMemo(
+    () => customers.find((c) => c._id === editingCustomerId) ?? null,
+    [customers, editingCustomerId],
+  );
+
   const handleFormSubmit = async (values: ProviderFormValues) => {
     if (providerModal.mode === "create") {
       await create(values);
@@ -68,6 +116,30 @@ const ProvidersPage = () => {
     const confirmed = window.confirm("Bạn có chắc muốn xóa nhà cung cấp này?");
     if (!confirmed) return;
     await remove(id);
+  };
+
+  const openCustomerModal = (mode: "create" | "edit", id?: string) => {
+    setCustomerModalMode(mode);
+    setEditingCustomerId(id ?? null);
+    setCustomerModalOpen(true);
+  };
+
+  const handleCustomerSubmit = async (values: CustomerFormValues) => {
+    if (customerModalMode === "create") {
+      await createCustomerMutation.mutateAsync(values);
+    } else if (editingCustomer) {
+      await updateCustomerMutation.mutateAsync({
+        id: editingCustomer._id,
+        values,
+      });
+    }
+  };
+
+  const handleDeleteCustomer = async (id: string) => {
+    const confirmed = window.confirm("Bạn có chắc muốn xóa khách hàng này?");
+    if (!confirmed) return;
+    await deleteCustomerMutation.mutateAsync(id);
+    await refetchCustomers();
   };
 
   const parties = partyType === "provider" ? providers : customers;
@@ -105,6 +177,41 @@ const ProvidersPage = () => {
         loading={isCreating || isUpdating}
         onClose={closeProviderModal}
         onSubmit={handleFormSubmit}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md pt-md">
+        <div>
+          <h2 className="text-h3 text-primary">Khách hàng</h2>
+          <p className="text-secondary text-body-md mt-xs">
+            Quản lý danh sách khách hàng và công nợ
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => openCustomerModal("create")}
+          className="px-md py-sm cursor-pointer bg-secondary text-on-secondary font-label-sm rounded-xl flex items-center justify-center gap-xs shadow-md active:scale-95 transition-all shrink-0"
+        >
+          <span className="material-symbols-outlined text-[18px]">person_add</span>
+          Thêm khách hàng
+        </button>
+      </div>
+
+      <CustomerTable
+        data={customers}
+        loading={customersLoading}
+        onEdit={(id) => openCustomerModal("edit", id)}
+        onDelete={handleDeleteCustomer}
+      />
+
+      <CustomerFormModal
+        open={customerModalOpen}
+        mode={customerModalMode}
+        customer={editingCustomer}
+        loading={
+          createCustomerMutation.isPending || updateCustomerMutation.isPending
+        }
+        onClose={() => setCustomerModalOpen(false)}
+        onSubmit={handleCustomerSubmit}
       />
 
       <section className="rounded-2xl border border-surface-container bg-surface-bright p-lg space-y-md">

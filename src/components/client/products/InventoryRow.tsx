@@ -1,9 +1,8 @@
+import { useState } from "react";
 import type { ProductTableItem } from "../../../types/product";
+import { PLACEHOLDER_PRODUCT_IMAGE } from "../../../utils/productHelpers";
 import StockProgress from "./StockProgress";
 import StatusBadge from "./StatusBadge";
-
-const PLACEHOLDER_IMAGE =
-  "https://placehold.co/80x80/e8eaf6/1e3a8a?text=SKU";
 
 type InventoryRowProps = {
   item: ProductTableItem;
@@ -12,6 +11,10 @@ type InventoryRowProps = {
 };
 
 const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
+  const [imageSrc, setImageSrc] = useState(
+    item.image || PLACEHOLDER_PRODUCT_IMAGE,
+  );
+
   return (
     <tr className="hover:bg-surface-container-low/20 transition-colors">
       <td className="px-md py-md">
@@ -22,9 +25,10 @@ const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
         <div className="flex items-center gap-sm">
           <div className="w-10 h-10 bg-surface-container rounded-lg flex-shrink-0 overflow-hidden">
             <img
-              src={item.image || PLACEHOLDER_IMAGE}
+              src={imageSrc}
               alt={item.name}
               className="w-full h-full object-cover"
+              onError={() => setImageSrc(PLACEHOLDER_PRODUCT_IMAGE)}
             />
           </div>
           <span className="font-body-md text-body-md font-medium">{item.name}</span>

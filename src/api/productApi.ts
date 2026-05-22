@@ -1,6 +1,7 @@
 import api from "./client";
 import { unwrap } from "./types";
 import type { Category, Product, ProductFormValues } from "../types/product";
+import { isValidProductImageUrl } from "../utils/productHelpers";
 
 const toPayload = (values: ProductFormValues) => {
   const payload: Record<string, unknown> = {
@@ -15,8 +16,9 @@ const toPayload = (values: ProductFormValues) => {
   if (values.minStock != null && !Number.isNaN(Number(values.minStock))) {
     payload.minStock = Number(values.minStock);
   }
-  if (values.imageUrl?.trim()) {
-    payload.images = [{ url: values.imageUrl.trim(), alt: values.name.trim() }];
+  const imageUrl = values.imageUrl?.trim();
+  if (imageUrl && isValidProductImageUrl(imageUrl)) {
+    payload.images = [{ url: imageUrl, alt: values.name.trim() }];
   }
   return payload;
 };
