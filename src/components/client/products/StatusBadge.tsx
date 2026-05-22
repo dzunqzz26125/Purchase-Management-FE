@@ -10,7 +10,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     },
     pending: {
       class: "bg-secondary-fixed text-on-secondary-fixed-variant",
-      label: "Đang đặt hàng",
+      label: "Hết hàng",
     },
   };
 

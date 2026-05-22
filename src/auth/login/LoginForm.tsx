@@ -4,7 +4,8 @@ import PasswordField from "./PasswordField";
 import SocialLogin from "./SocialLogin";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import api from "../../mock/api";
+import api from "../../api/client";
+import { setAccessToken } from "../../api/client";
 
 export default function LoginForm() {
   const {
@@ -25,10 +26,8 @@ export default function LoginForm() {
         password: data.password,
       });
       const accessToken = res?.data?.data?.accessToken;
-      if (accessToken) {
-        localStorage.setItem("accessToken", JSON.stringify(accessToken));
-      }
-      navigate("/app/inventory");
+      if (accessToken) setAccessToken(accessToken);
+      navigate("/app/dashboard");
     } catch (error: any) {
       setServerError(
         error.response?.data?.message ||
