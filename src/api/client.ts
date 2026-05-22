@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_BASE_URL } from "./config";
 
-export { API_BASE_URL };
+export { API_BASE_URL } from "./config";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +28,6 @@ export const clearAccessToken = () => {
   localStorage.removeItem("accessToken");
 };
 
-/** Luôn gọi backend Render; chặn localhost / URL tuyệt đối lệch host. */
 api.interceptors.request.use((config) => {
   config.baseURL = API_BASE_URL;
 

@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Nếu chưa set trên Netlify UI, dùng giá trị này khi build production
+[context.production.environment]
+  VITE_API_URL = "https://purchase-management-be.onrender.com/api"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://purchase-management-be.onrender.com/api"
