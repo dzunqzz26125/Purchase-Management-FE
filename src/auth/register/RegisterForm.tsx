@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
+import { getApiErrorMessage } from "../../api/getApiErrorMessage";
 
 const RegisterForm = () => {
   const {
@@ -21,14 +22,14 @@ const RegisterForm = () => {
     try {
       setLoading(true);
       await api.post("/auth/register", {
-        name: data.name,
-        email: data.email,
+        name: String(data.name).trim(),
+        email: String(data.email).trim().toLowerCase(),
         password: data.password,
       });
       navigate("/login");
-    } catch (error: any) {
+    } catch (error: unknown) {
       setServerError(
-        error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
+        getApiErrorMessage(error, "Đăng ký thất bại. Vui lòng thử lại."),
       );
     } finally {
       setLoading(false);

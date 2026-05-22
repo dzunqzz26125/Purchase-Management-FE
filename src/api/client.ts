@@ -1,21 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "./config";
 
-/** Backend production trên Render */
-export const DEPLOYED_API_BASE =
-  "https://purchase-management-be.onrender.com/api";
-
-/**
- * Luôn ưu tiên API public. Bỏ qua VITE_API_URL trỏ localhost (từ .env.local hoặc biến môi trường cũ).
- */
-export const resolveApiBaseUrl = (): string => {
-  const fromEnv = import.meta.env.VITE_API_URL?.trim();
-  if (fromEnv && !/localhost|127\.0\.0\.1/i.test(fromEnv)) {
-    return fromEnv.replace(/\/$/, "");
-  }
-  return DEPLOYED_API_BASE;
-};
-
-export const API_BASE_URL = resolveApiBaseUrl();
+export { API_BASE_URL };
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -42,9 +28,23 @@ export const clearAccessToken = () => {
   localStorage.removeItem("accessToken");
 };
 
+/** Luôn gọi backend Render; chặn localhost / URL tuyệt đối lệch host. */
 api.interceptors.request.use((config) => {
+  config.baseURL = API_BASE_URL;
+
+  const url = config.url ?? "";
+  if (/^https?:\/\//i.test(url)) {
+    if (/localhost|127\.0\.0\.1/i.test(url)) {
+      const path = url.replace(/^https?:\/\/[^/]+/i, "") || "/";
+      config.url = path.startsWith("/") ? path : `/${path}`;
+    }
+  } else if (url && !url.startsWith("/")) {
+    config.url = `/${url}`;
+  }
+
   const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
   return config;
 });
 
