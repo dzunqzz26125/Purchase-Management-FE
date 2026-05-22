@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import RegisterForm from "./RegisterForm";
 
 const RegisterMain = () => {
@@ -55,12 +56,12 @@ const RegisterMain = () => {
         <footer className="mt-xl text-center">
           <p className="font-body-md text-body-md text-secondary">
             Bạn đã có tài khoản?
-            <a
+            <Link
               className="text-primary font-bold hover:underline ml-xs"
-              href="#"
+              to={"/login"}
             >
               Đăng nhập ngay
-            </a>
+            </Link>
           </p>
         </footer>
       </div>

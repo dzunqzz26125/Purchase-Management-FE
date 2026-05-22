@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/client";
 import { setAccessToken } from "../../api/client";
+import { getApiErrorMessage } from "../../api/getApiErrorMessage";
 
 export default function LoginForm() {
   const {
@@ -22,16 +23,15 @@ export default function LoginForm() {
     try {
       setLoading(true);
       const res = await api.post("/auth/login", {
-        email: data.email,
+        email: String(data.email).trim().toLowerCase(),
         password: data.password,
       });
       const accessToken = res?.data?.data?.accessToken;
       if (accessToken) setAccessToken(accessToken);
       navigate("/app/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       setServerError(
-        error.response?.data?.message ||
-          "Đăng nhập thất bại. Vui lòng thử lại.",
+        getApiErrorMessage(error, "Đăng nhập thất bại. Vui lòng thử lại."),
       );
     } finally {
       setLoading(false);
