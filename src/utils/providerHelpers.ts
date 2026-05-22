@@ -6,6 +6,7 @@ export const providerToFormValues = (provider: Provider): ProviderFormValues => 
   email: provider.email ?? "",
   address: provider.address ?? "",
   note: provider.note ?? "",
+  debt: String(provider.debt ?? 0),
 });
 
 export const toProviderPayload = (values: ProviderFormValues) => {

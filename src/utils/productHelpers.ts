@@ -5,6 +5,32 @@ import type {
   StockStatus,
 } from "../types/product";
 
+export const PLACEHOLDER_PRODUCT_IMAGE =
+  "https://placehold.co/80x80/e8eaf6/1e3a8a?text=SKU";
+
+const DATA_IMAGE_RE =
+  /^data:image\/[a-zA-Z0-9+.-]+;base64,[A-Za-z0-9+/]+={0,2}$/;
+
+/** Reject truncated or malformed data URLs (common cause of ERR_INVALID_URL). */
+export const isValidProductImageUrl = (url: string): boolean => {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return true;
+  }
+  if (trimmed.startsWith("data:image/")) {
+    return DATA_IMAGE_RE.test(trimmed) && trimmed.length >= 500;
+  }
+  return false;
+};
+
+export const resolveProductImageSrc = (url?: string | null): string => {
+  if (!url?.trim() || !isValidProductImageUrl(url)) {
+    return PLACEHOLDER_PRODUCT_IMAGE;
+  }
+  return url.trim();
+};
+
 export const getCategoryName = (
   product: Product,
   categories: Category[],
@@ -49,7 +75,7 @@ export const toTableItem = (
   stock: product.stock,
   minStock: product.minStock,
   status: getStockStatus(product.stock, product.minStock),
-  image: product.images?.[0]?.url,
+  image: resolveProductImageSrc(product.images?.[0]?.url),
   unit: product.unit,
   costPrice: product.costPrice,
   sellPrice: product.sellPrice,

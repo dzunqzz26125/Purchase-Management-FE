@@ -216,9 +216,12 @@ export default function ProductFormModal({
               <label className={labelClass}>URL ảnh sản phẩm</label>
               <input
                 className={fieldClass}
-                placeholder="https://..."
+                placeholder="https://example.com/image.jpg"
                 {...register("imageUrl")}
               />
+              <p className="text-label-xs text-secondary">
+                Dùng link https. Không dán base64 — dữ liệu dài dễ bị cắt và không hiển thị.
+              </p>
             </div>
           </div>
 
