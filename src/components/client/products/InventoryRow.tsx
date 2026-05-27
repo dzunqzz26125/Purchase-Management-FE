@@ -18,7 +18,9 @@ const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
   return (
     <tr className="hover:bg-surface-container-low/20 transition-colors">
       <td className="px-md py-md">
-        <span className="font-label-sm text-label-sm text-primary">{item.sku}</span>
+        <span className="font-label-sm text-label-sm text-primary">
+          {item.sku}
+        </span>
       </td>
 
       <td className="px-md py-md">
@@ -31,7 +33,9 @@ const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
               onError={() => setImageSrc(PLACEHOLDER_PRODUCT_IMAGE)}
             />
           </div>
-          <span className="font-body-md text-body-md font-medium">{item.name}</span>
+          <span className="font-body-md text-body-md font-medium">
+            {item.name}
+          </span>
         </div>
       </td>
 
@@ -39,7 +43,11 @@ const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
         <span className="text-body-md text-secondary">{item.category}</span>
       </td>
 
-      <td className="px-md py-md min-w-[200px]">
+      <td className="px-md py-md">
+        <span className="text-body-md text-secondary">{item.providerName}</span>
+      </td>
+
+      <td className="px-md py-md max-w-50 overflow-hidden">
         <StockProgress value={item.stock} />
       </td>
 
@@ -63,7 +71,9 @@ const InventoryRow = ({ item, onEdit, onDelete }: InventoryRowProps) => {
             className="p-xs text-secondary hover:text-error transition-colors"
             title="Xóa mềm"
           >
-            <span className="material-symbols-outlined text-[20px]">delete</span>
+            <span className="material-symbols-outlined text-[20px]">
+              delete
+            </span>
           </button>
         </div>
       </td>

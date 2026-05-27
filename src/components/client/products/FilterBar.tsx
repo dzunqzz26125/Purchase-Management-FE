@@ -7,6 +7,7 @@ type FilterBarProps = {
   onCategoryChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onAddClick: () => void;
+  onManageCategoriesClick: () => void;
 };
 
 const FilterBar = ({
@@ -16,6 +17,7 @@ const FilterBar = ({
   onCategoryChange,
   onStatusChange,
   onAddClick,
+  onManageCategoriesClick,
 }: FilterBarProps) => {
   return (
     <section className="flex flex-col md:flex-row md:items-center justify-between gap-md mb-md">
@@ -58,8 +60,16 @@ const FilterBar = ({
       <div className="flex items-center gap-sm">
         <button
           type="button"
+          onClick={onManageCategoriesClick}
+          className="px-md py-sm border border-surface-container bg-surface-container-lowest text-secondary font-label-sm text-label-sm rounded-xl flex items-center gap-xs shadow-sm hover:bg-surface-container hover:text-primary active:scale-95 transition-all outline-none cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-[18px]">category</span>
+          Quản lý Phân loại
+        </button>
+        <button
+          type="button"
           onClick={onAddClick}
-          className="px-md py-sm bg-primary text-on-primary font-label-sm text-label-sm rounded-xl flex items-center gap-xs shadow-md active:scale-95 transition-all outline-none"
+          className="px-md py-sm bg-primary text-on-primary font-label-sm text-label-sm rounded-xl flex items-center gap-xs shadow-md active:scale-95 transition-all outline-none cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Thêm Sản phẩm mới

@@ -8,6 +8,14 @@ export type DashboardAnalytics = {
     completedSalesOrders: number;
     providerDebt: number;
     customerDebt: number;
+    
+    periodRevenue?: number;
+    periodCollected?: number;
+    periodOrders?: number;
+    periodImported?: number;
+    periodPaidToProviders?: number;
+    periodPOCount?: number;
+
     monthlyRevenue: number;
     monthlyCollected: number;
     monthlyOrders: number;
@@ -31,7 +39,42 @@ export type DashboardAnalytics = {
   };
 };
 
+export type StockActivity = {
+  _id: string;
+  productId: {
+    _id: string;
+    name: string;
+    sku: string;
+    unit: string;
+  } | null;
+  type: "import" | "export" | "adjustment";
+  qty: number;
+  before: number;
+  after: number;
+  referenceType: "purchase" | "sale" | "manual";
+  referenceId: string;
+  batchCode?: string;
+  note?: string;
+  createdBy: {
+    _id: string;
+    name: string;
+  } | null;
+  createdAt: string;
+};
+
+export type PaginatedActivities = {
+  activities: StockActivity[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+};
+
 export const analyticsApi = {
-  dashboard: async (): Promise<DashboardAnalytics> =>
-    unwrap(await api.get("/analytics/dashboard")),
+  dashboard: async (params?: { startDate?: string; endDate?: string }): Promise<DashboardAnalytics> =>
+    unwrap(await api.get("/analytics/dashboard", { params })),
+  activities: async (params: { page: number; limit: number; startDate?: string; endDate?: string }): Promise<PaginatedActivities> =>
+    unwrap(await api.get("/analytics/activities", { params })),
 };

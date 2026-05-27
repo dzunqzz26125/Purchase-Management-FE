@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FilterBar from "../components/client/products/FilterBar";
 import InventoryTable from "../components/client/products/InventoryTable";
 import StatCard from "../components/client/products/StatCard";
 import ProductFormModal from "../feat/product/ProductFormModal";
-import { categoryApi, productApi } from "../api/productApi";
+import CategoryManagerModal from "../feat/product/CategoryManagerModal";
+import { productApi } from "../api/productApi";
 import { useCrud } from "../hooks/useCrud";
 import { useAppStore } from "../store/useAppStore";
 import type { Product, ProductFormValues } from "../types/product";
 import { toTableItem } from "../utils/productHelpers";
+import { categoryApi } from "../api/categoryApi";
 
 const Inventory = () => {
   const {
@@ -20,6 +22,8 @@ const Inventory = () => {
     setCategoryFilter,
     setStatusFilter,
   } = useAppStore();
+
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", "list"],
@@ -51,7 +55,8 @@ const Inventory = () => {
       products
         .map((product) => toTableItem(product, categories))
         .filter((item) => {
-          if (categoryFilter && item.categoryId !== categoryFilter) return false;
+          if (categoryFilter && item.categoryId !== categoryFilter)
+            return false;
           if (statusFilter && item.status !== statusFilter) return false;
           return true;
         }),
@@ -84,6 +89,7 @@ const Inventory = () => {
         onCategoryChange={setCategoryFilter}
         onStatusChange={setStatusFilter}
         onAddClick={() => openProductModal("create")}
+        onManageCategoriesClick={() => setCategoryModalOpen(true)}
       />
 
       <InventoryTable
@@ -103,6 +109,12 @@ const Inventory = () => {
         loading={isCreating || isUpdating}
         onClose={closeProductModal}
         onSubmit={handleFormSubmit}
+      />
+
+      <CategoryManagerModal
+        open={categoryModalOpen}
+        categories={categories}
+        onClose={() => setCategoryModalOpen(false)}
       />
     </>
   );
