@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { customerApi } from "../api/customerApi";
 import { productApi } from "../api/productApi";
 import type { Product } from "../types/product";
 import { salesOrderApi, type CreateSOInput } from "../api/salesOrderApi";
+import InvoiceModal from "../components/client/InvoiceModal";
 
 type LineItem = { productId: string; qty: number; price: number };
 
@@ -17,6 +18,9 @@ const OutboundPage = () => {
   const [items, setItems] = useState<LineItem[]>([
     { productId: "", qty: 1, price: 0 },
   ]);
+
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any>(null);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", "list"],
@@ -42,6 +46,9 @@ const OutboundPage = () => {
       setItems([{ productId: "", qty: 1, price: 0 }]);
       setPaidAmount(0);
     },
+    onError: (err: any) => {
+      alert("Lỗi khi tạo đơn bán: " + (err?.response?.data?.message || err.message));
+    },
   });
 
   const updateLine = (index: number, patch: Partial<LineItem>) => {
@@ -50,15 +57,27 @@ const OutboundPage = () => {
     );
   };
 
-  const grandTotal = items.reduce(
-    (sum, line) => sum + line.qty * line.price,
-    0,
-  );
+  const addLine = () => {
+    setItems((prev) => [...prev, { productId: "", qty: 1, price: 0 }]);
+  };
+
+  const removeLine = (index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const grandTotal = useMemo(() => {
+    return items.reduce((sum, line) => sum + line.qty * line.price, 0);
+  }, [items]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const activeItems = items.filter((i) => i.productId);
+    if (activeItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm!");
+      return;
+    }
     const payload: CreateSOInput = {
-      items: items.filter((i) => i.productId),
+      items: activeItems,
       paymentMethod,
       paidAmount,
     };
@@ -69,6 +88,11 @@ const OutboundPage = () => {
       payload.customerPhone = customerPhone;
     }
     await createMutation.mutateAsync(payload);
+  };
+
+  const handleShowInvoice = (so: any) => {
+    setSelectedInvoiceOrder(so);
+    setInvoiceModalOpen(true);
   };
 
   return (
@@ -90,7 +114,7 @@ const OutboundPage = () => {
           <label className="block">
             <span className="text-label-sm text-secondary">Khách hàng (đã có)</span>
             <select
-              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
+              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs bg-white"
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
             >
@@ -128,7 +152,7 @@ const OutboundPage = () => {
           <label className="block">
             <span className="text-label-sm text-secondary">Thanh toán</span>
             <select
-              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
+              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs bg-white"
               value={paymentMethod}
               onChange={(e) =>
                 setPaymentMethod(e.target.value as "cash" | "transfer")
@@ -139,7 +163,7 @@ const OutboundPage = () => {
             </select>
           </label>
           <label className="block">
-            <span className="text-label-sm text-secondary">Đã thu</span>
+            <span className="text-label-sm text-secondary">Đã thu (VNĐ)</span>
             <input
               type="number"
               min={0}
@@ -152,74 +176,99 @@ const OutboundPage = () => {
         </div>
 
         <div className="space-y-sm">
-          {items.map((line, idx) => (
-            <div key={idx} className="grid grid-cols-12 gap-sm items-end">
-              <div className="col-span-6">
-                <select
-                  className="w-full rounded-xl border border-outline-variant px-sm py-xs"
-                  value={line.productId}
-                  onChange={(e) => {
-                    const product = products.find((p) => p._id === e.target.value);
-                    updateLine(idx, {
-                      productId: e.target.value,
-                      price: product?.sellPrice ?? line.price,
-                    });
-                  }}
-                  required
-                >
-                  <option value="">Sản phẩm</option>
-                  {products.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} (TK: {p.stock})
-                    </option>
-                  ))}
-                </select>
+          <label className="block text-label-sm text-secondary font-medium">Danh sách sản phẩm bán</label>
+          <div className="space-y-xs">
+            {items.map((line, idx) => (
+              <div key={idx} className="grid grid-cols-12 gap-sm items-center">
+                <div className="col-span-5">
+                  <select
+                    className="w-full rounded-xl border border-outline-variant px-sm py-xs bg-white"
+                    value={line.productId}
+                    onChange={(e) => {
+                      const product = products.find((p) => p._id === e.target.value);
+                      updateLine(idx, {
+                        productId: e.target.value,
+                        price: product?.sellPrice ?? line.price,
+                      });
+                    }}
+                    required
+                  >
+                    <option value="">Sản phẩm</option>
+                    {products.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name} (Tồn: {p.stock})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-full rounded-xl border border-outline-variant px-sm py-xs"
+                    value={line.qty}
+                    onChange={(e) => updateLine(idx, { qty: Number(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div className="col-span-2">
+                  <input
+                    type="number"
+                    min={0}
+                    className="w-full rounded-xl border border-outline-variant px-sm py-xs"
+                    value={line.price}
+                    onChange={(e) =>
+                      updateLine(idx, { price: Number(e.target.value) })
+                    }
+                    required
+                  />
+                </div>
+                <div className="col-span-2">
+                  <input
+                    type="text"
+                    readOnly
+                    placeholder="Thành tiền"
+                    className="w-full rounded-xl border border-surface-container bg-surface-container-low px-sm py-xs text-right font-semibold text-secondary"
+                    value={`${(line.qty * line.price).toLocaleString()}đ`}
+                  />
+                </div>
+                <div className="col-span-1 text-center">
+                  <button
+                    type="button"
+                    onClick={() => removeLine(idx)}
+                    disabled={items.length <= 1}
+                    className="p-xs text-secondary hover:text-error disabled:opacity-40 cursor-pointer"
+                    title="Xóa dòng"
+                  >
+                    <span className="material-symbols-outlined text-[20px] block">delete</span>
+                  </button>
+                </div>
               </div>
-              <div className="col-span-2">
-                <input
-                  type="number"
-                  min={1}
-                  className="w-full rounded-xl border border-outline-variant px-sm py-xs"
-                  value={line.qty}
-                  onChange={(e) => updateLine(idx, { qty: Number(e.target.value) })}
-                />
-              </div>
-              <div className="col-span-3">
-                <input
-                  type="number"
-                  min={0}
-                  className="w-full rounded-xl border border-outline-variant px-sm py-xs"
-                  value={line.price}
-                  onChange={(e) =>
-                    updateLine(idx, { price: Number(e.target.value) })
-                  }
-                />
-              </div>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setItems((prev) => [...prev, { productId: "", qty: 1, price: 0 }])
-            }
-            className="text-primary text-label-sm font-semibold"
-          >
-            + Thêm dòng
-          </button>
+            ))}
+            <button
+              type="button"
+              onClick={addLine}
+              className="text-primary text-label-sm font-semibold hover:underline flex items-center gap-0.5 cursor-pointer mt-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              Thêm dòng sản phẩm
+            </button>
+          </div>
         </div>
 
-        <p className="text-label-md font-semibold text-primary">
-          Tổng: {grandTotal.toLocaleString()}đ — Còn nợ:{" "}
-          {Math.max(0, grandTotal - paidAmount).toLocaleString()}đ
-        </p>
-
-        <button
-          type="submit"
-          disabled={createMutation.isPending}
-          className="rounded-xl bg-primary px-lg py-sm text-on-primary font-semibold disabled:opacity-60"
-        >
-          {createMutation.isPending ? "Đang tạo..." : "Tạo đơn bán & xuất kho"}
-        </button>
+        <div className="pt-sm border-t border-surface-container flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
+          <p className="text-body-md font-semibold text-primary">
+            Tổng: {grandTotal.toLocaleString()}đ &mdash; Còn nợ KH:{" "}
+            {Math.max(0, grandTotal - paidAmount).toLocaleString()}đ
+          </p>
+          <button
+            type="submit"
+            disabled={createMutation.isPending}
+            className="rounded-xl bg-primary px-lg py-sm text-on-primary font-semibold disabled:opacity-60 cursor-pointer active:scale-95 transition-all"
+          >
+            {createMutation.isPending ? "Đang tạo..." : "Tạo đơn bán & xuất kho"}
+          </button>
+        </div>
       </form>
 
       <div className="rounded-2xl border border-surface-container bg-surface-bright overflow-hidden">
@@ -237,24 +286,72 @@ const OutboundPage = () => {
                 <th className="px-lg py-sm">Tổng</th>
                 <th className="px-lg py-sm">TT</th>
                 <th className="px-lg py-sm">Trạng thái</th>
+                <th className="px-lg py-sm text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((so) => (
-                <tr key={so._id} className="border-t border-surface-container">
+                <tr key={so._id} className="border-t border-surface-container hover:bg-surface-container-low/10">
                   <td className="px-lg py-sm font-medium">{so.orderCode}</td>
                   <td className="px-lg py-sm">{so.customerName || "—"}</td>
                   <td className="px-lg py-sm">
                     {so.grandTotal.toLocaleString()}đ
                   </td>
-                  <td className="px-lg py-sm">{so.paymentStatus}</td>
-                  <td className="px-lg py-sm">{so.status}</td>
+                  <td className="px-lg py-sm">
+                    <span
+                      className={`px-sm py-0.5 rounded-full text-label-xs font-semibold ${
+                        so.paymentStatus === "paid"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : so.paymentStatus === "partial"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-error-container/40 text-error"
+                      }`}
+                    >
+                      {so.paymentStatus === "paid"
+                        ? "Đã thu đủ"
+                        : so.paymentStatus === "partial"
+                        ? "Thu một phần"
+                        : "Chưa thanh toán"}
+                    </span>
+                  </td>
+                  <td className="px-lg py-sm">
+                    <span className="px-sm py-0.5 rounded-full text-label-xs bg-slate-100 text-slate-700 font-semibold uppercase">
+                      {so.status}
+                    </span>
+                  </td>
+                  <td className="px-lg py-sm text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleShowInvoice(so)}
+                      className="text-primary font-semibold hover:underline cursor-pointer flex items-center justify-end gap-0.5 ml-auto"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">print</span>
+                      Hóa đơn
+                    </button>
+                  </td>
                 </tr>
               ))}
+              {orders.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-lg text-secondary">
+                    Chưa có đơn bán hàng nào
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
       </div>
+
+      <InvoiceModal
+        open={invoiceModalOpen}
+        type="SO"
+        order={selectedInvoiceOrder}
+        onClose={() => {
+          setInvoiceModalOpen(false);
+          setSelectedInvoiceOrder(null);
+        }}
+      />
     </div>
   );
 };

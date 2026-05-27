@@ -2,6 +2,7 @@ export interface Category {
   _id: string;
   name: string;
   description?: string;
+  providerId: string | { _id: string; name: string };
 }
 
 export interface ProductImage {
@@ -14,6 +15,7 @@ export interface Product {
   sku: string;
   name: string;
   categoryId: string | Category;
+  providerId?: string | { _id: string; name: string };
   unit: string;
   costPrice: number;
   sellPrice: number;
@@ -45,6 +47,7 @@ export interface ProductTableItem {
   name: string;
   category: string;
   categoryId: string;
+  providerName: string;
   stock: number;
   minStock?: number;
   status: StockStatus;

@@ -30,7 +30,10 @@ const InventoryTable = ({
                 Phân loại
               </th>
               <th className="px-md py-md font-label-sm text-label-sm text-secondary">
-                Mức tồn kho
+                Nhà cung cấp
+              </th>
+              <th className="px-md py-md font-label-sm text-label-sm text-secondary">
+                Tồn kho
               </th>
               <th className="px-md py-md font-label-sm text-label-sm text-secondary">
                 Trạng thái
@@ -43,13 +46,19 @@ const InventoryTable = ({
           <tbody className="divide-y divide-surface-container/30">
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-md py-xl text-center text-secondary">
+                <td
+                  colSpan={7}
+                  className="px-md py-xl text-center text-secondary"
+                >
                   Đang tải dữ liệu...
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-md py-xl text-center text-secondary">
+                <td
+                  colSpan={7}
+                  className="px-md py-xl text-center text-secondary"
+                >
                   Chưa có sản phẩm nào
                 </td>
               </tr>

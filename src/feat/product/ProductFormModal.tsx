@@ -43,6 +43,7 @@ export default function ProductFormModal({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ProductFormValues>({ defaultValues });
 
@@ -54,6 +55,14 @@ export default function ProductFormModal({
       reset(defaultValues);
     }
   }, [open, mode, product, reset]);
+
+  const selectedCategoryId = watch("categoryId");
+  const selectedCat = categories.find((c) => c._id === selectedCategoryId);
+  const providerName = selectedCat
+    ? typeof selectedCat.providerId === "object" && selectedCat.providerId
+      ? selectedCat.providerId.name
+      : "Đang tải..."
+    : "";
 
   if (!open) return null;
 
@@ -125,6 +134,11 @@ export default function ProductFormModal({
                   </option>
                 ))}
               </select>
+              {providerName && (
+                <p className="text-label-xs text-emerald-600 font-semibold mt-xs">
+                  Nhà cung cấp: {providerName}
+                </p>
+              )}
               {errors.categoryId && (
                 <p className="text-error text-label-xs">
                   {errors.categoryId.message}

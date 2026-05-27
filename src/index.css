@@ -123,3 +123,21 @@
 .custom-shadow {
   box-shadow: 0 10px 30px -5px rgba(30, 58, 138, 0.05);
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice-print-area, #invoice-print-area * {
+    visibility: visible;
+  }
+  #invoice-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    color: black;
+    padding: 24px;
+  }
+}

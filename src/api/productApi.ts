@@ -24,8 +24,7 @@ const toPayload = (values: ProductFormValues) => {
 };
 
 export const productApi = {
-  list: async (): Promise<Product[]> =>
-    unwrap(await api.get("/products")),
+  list: async (): Promise<Product[]> => unwrap(await api.get("/products")),
   getById: async (id: string): Promise<Product> =>
     unwrap(await api.get(`/products/${id}`)),
   create: async (values: ProductFormValues): Promise<Product> =>
@@ -35,8 +34,4 @@ export const productApi = {
   remove: async (id: string): Promise<void> => {
     await api.delete(`/products/${id}`);
   },
-};
-
-export const categoryApi = {
-  list: async (): Promise<Category[]> => unwrap(await api.get("/categories")),
 };

@@ -72,6 +72,10 @@ export const toTableItem = (
   name: product.name,
   category: getCategoryName(product, categories),
   categoryId: getCategoryId(product),
+  providerName:
+    typeof product.providerId === "object" && product.providerId
+      ? product.providerId.name
+      : "—",
   stock: product.stock,
   minStock: product.minStock,
   status: getStockStatus(product.stock, product.minStock),
