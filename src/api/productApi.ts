@@ -5,7 +5,6 @@ import { isValidProductImageUrl } from "../utils/productHelpers";
 
 const toPayload = (values: ProductFormValues) => {
   const payload: Record<string, unknown> = {
-    sku: values.sku.trim(),
     name: values.name.trim(),
     categoryId: values.categoryId,
     unit: values.unit.trim(),
@@ -13,6 +12,8 @@ const toPayload = (values: ProductFormValues) => {
     sellPrice: Number(values.sellPrice),
     stock: Number(values.stock),
   };
+  const sku = values.sku?.trim();
+  if (sku) payload.sku = sku;
   if (values.minStock != null && !Number.isNaN(Number(values.minStock))) {
     payload.minStock = Number(values.minStock);
   }

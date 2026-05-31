@@ -28,7 +28,7 @@ export interface Product {
 }
 
 export interface ProductFormValues {
-  sku: string;
+  sku?: string;
   name: string;
   categoryId: string;
   unit: string;

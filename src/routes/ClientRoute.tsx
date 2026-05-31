@@ -10,6 +10,7 @@ import InboundPage from "../pages/PO-Page";
 import OutboundPage from "../pages/SO-Page";
 import ReportPage from "../pages/ReportPage";
 import ProvidersPage from "../pages/ProvidersPage";
+import AgencyPage from "../pages/AgencyPage";
 
 const routes = createBrowserRouter([
   { path: "/", element: <IntroducePage /> },
@@ -27,6 +28,7 @@ const routes = createBrowserRouter([
       { path: "po", element: <InboundPage /> },
       { path: "so", element: <OutboundPage /> },
       { path: "providers", element: <ProvidersPage /> },
+      { path: "agency", element: <AgencyPage /> },
       { path: "report", element: <ReportPage /> },
     ],
   },

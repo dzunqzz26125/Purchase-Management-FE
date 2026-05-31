@@ -1,7 +1,9 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import type { Category, Product, ProductFormValues } from "../../types/product";
 import { productToFormValues } from "../../utils/productHelpers";
+import { providerApi } from "../../api/providerApi";
 
 type ProductFormModalProps = {
   open: boolean;
@@ -14,7 +16,6 @@ type ProductFormModalProps = {
 };
 
 const defaultValues: ProductFormValues = {
-  sku: "",
   name: "",
   categoryId: "",
   unit: "",
@@ -58,10 +59,20 @@ export default function ProductFormModal({
 
   const selectedCategoryId = watch("categoryId");
   const selectedCat = categories.find((c) => c._id === selectedCategoryId);
+
+  const { data: providers = [] } = useQuery({
+    queryKey: ["providers", "list"],
+    queryFn: providerApi.list,
+    enabled: open,
+  });
+
   const providerName = selectedCat
     ? typeof selectedCat.providerId === "object" && selectedCat.providerId
       ? selectedCat.providerId.name
-      : "Đang tải..."
+      : typeof selectedCat.providerId === "string"
+        ? providers.find((p) => p._id === selectedCat.providerId)?.name ??
+          "Không xác định"
+        : "Không xác định"
     : "";
 
   if (!open) return null;
@@ -88,23 +99,14 @@ export default function ProductFormModal({
             onClick={onClose}
             className="p-xs text-secondary hover:text-primary rounded-lg"
           >
-            <span className="material-symbols-outlined cursor-pointer">close</span>
+            <span className="material-symbols-outlined cursor-pointer">
+              close
+            </span>
           </button>
         </div>
 
         <form onSubmit={submit} className="p-md space-y-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div className="space-y-xs md:col-span-2">
-              <label className={labelClass}>SKU *</label>
-              <input
-                className={fieldClass}
-                {...register("sku", { required: "Vui lòng nhập SKU" })}
-              />
-              {errors.sku && (
-                <p className="text-error text-label-xs">{errors.sku.message}</p>
-              )}
-            </div>
-
             <div className="space-y-xs">
               <label className={labelClass}>Tên sản phẩm *</label>
               <input
@@ -115,7 +117,9 @@ export default function ProductFormModal({
                 })}
               />
               {errors.name && (
-                <p className="text-error text-label-xs">{errors.name.message}</p>
+                <p className="text-error text-label-xs">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -154,7 +158,9 @@ export default function ProductFormModal({
                 {...register("unit", { required: "Vui lòng nhập đơn vị" })}
               />
               {errors.unit && (
-                <p className="text-error text-label-xs">{errors.unit.message}</p>
+                <p className="text-error text-label-xs">
+                  {errors.unit.message}
+                </p>
               )}
             </div>
 
@@ -209,7 +215,9 @@ export default function ProductFormModal({
                 })}
               />
               {errors.stock && (
-                <p className="text-error text-label-xs">{errors.stock.message}</p>
+                <p className="text-error text-label-xs">
+                  {errors.stock.message}
+                </p>
               )}
             </div>
 
@@ -234,7 +242,8 @@ export default function ProductFormModal({
                 {...register("imageUrl")}
               />
               <p className="text-label-xs text-secondary">
-                Dùng link https. Không dán base64 — dữ liệu dài dễ bị cắt và không hiển thị.
+                Dùng link https. Không dán base64 — dữ liệu dài dễ bị cắt và
+                không hiển thị.
               </p>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import InputField from "./InputField";
 import PasswordField from "./PasswordField";
 import SocialLogin from "./SocialLogin";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/client";
 import { setAccessToken } from "../../api/client";
@@ -15,6 +15,11 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const verified = searchParams.get("verified") === "true";
+  const registered = (location.state as { registered?: boolean })?.registered;
+  const registeredEmail = (location.state as { email?: string })?.email;
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
 
@@ -43,6 +48,17 @@ export default function LoginForm() {
         <h2 className="text-h2 mb-xs">Chào mừng trở lại</h2>
 
         <form className="space-y-md" onSubmit={handleSubmit(onSubmit)}>
+          {registered && (
+            <div className="p-sm bg-primary-container text-on-primary-container rounded-xl text-label-sm font-medium">
+              Đăng ký thành công{registeredEmail ? ` với ${registeredEmail}` : ""}.
+              Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập.
+            </div>
+          )}
+          {verified && (
+            <div className="p-sm bg-primary-container text-on-primary-container rounded-xl text-label-sm font-medium">
+              Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.
+            </div>
+          )}
           {serverError && (
             <div className="p-sm bg-error-container text-on-error-container rounded-xl text-label-sm font-medium">
               {serverError}

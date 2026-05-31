@@ -28,11 +28,25 @@ export default function CategoryManagerModal({
 
   const createMutation = useMutation({
     mutationFn: categoryApi.create,
-    onSuccess: (newCategory) => {
+    onSuccess: async (created) => {
+      const pickedProvider = providers.find((p) => p._id === providerId);
+      const enriched: Category = {
+        ...created,
+        providerId: pickedProvider
+          ? { _id: pickedProvider._id, name: pickedProvider.name }
+          : providerId,
+      };
+
+      // Ensure UI immediately shows selected provider name even if BE doesn't return providerId.
       queryClient.setQueryData<Category[]>(
         ["categories", "list"],
-        (old = []) => [...old, newCategory],
+        (old = []) => {
+          const exists = old.some((c) => c._id === enriched._id);
+          return exists ? old : [...old, enriched];
+        },
       );
+
+      await queryClient.invalidateQueries({ queryKey: ["categories", "list"] });
       setName("");
       setDescription("");
       setProviderId("");
@@ -48,7 +62,7 @@ export default function CategoryManagerModal({
   const deleteMutation = useMutation({
     mutationFn: categoryApi.remove,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories", "list"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
     onError: (err: any) => {
@@ -181,18 +195,13 @@ export default function CategoryManagerModal({
             ) : (
               <div className="space-y-xs">
                 {categories.map((cat) => {
-                  console.log(
-                    "cat._id:",
-                    cat._id,
-                    "| providerId:",
-                    cat.providerId,
-                    "| type:",
-                    typeof cat.providerId,
-                  );
                   const pName =
                     typeof cat.providerId === "object" && cat.providerId
                       ? cat.providerId.name
-                      : "Không xác định";
+                      : typeof cat.providerId === "string"
+                        ? providers.find((p) => p._id === cat.providerId)?.name ??
+                          "Không xác định"
+                        : "Không xác định";
 
                   return (
                     <div

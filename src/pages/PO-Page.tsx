@@ -3,12 +3,18 @@ import { useState, useMemo } from "react";
 import { productApi } from "../api/productApi";
 import type { Product } from "../types/product";
 import { providerApi } from "../api/providerApi";
+import { paymentApi } from "../api/paymentApi";
 import {
   purchaseOrderApi,
   type CreatePOInput,
   type PurchaseOrder,
 } from "../api/purchaseOrderApi";
 import InvoiceModal from "../components/client/InvoiceModal";
+import {
+  formatVnd,
+  formatVndInput,
+  parseVndInput,
+} from "../utils/formatVnd";
 
 type LineItem = { productId: string; qtyOrdered: number; costPrice: number };
 
@@ -16,6 +22,9 @@ const InboundPage = () => {
   const queryClient = useQueryClient();
   const [providerId, setProviderId] = useState("");
   const [paidAmount, setPaidAmount] = useState(0);
+  const [paidAmountInput, setPaidAmountInput] = useState("");
+  const [debtPayAmount, setDebtPayAmount] = useState("");
+  const [debtPayNote, setDebtPayNote] = useState("");
   const [items, setItems] = useState<LineItem[]>([
     { productId: "", qtyOrdered: 1, costPrice: 0 },
   ]);
@@ -44,6 +53,7 @@ const InboundPage = () => {
       queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
       setItems([{ productId: "", qtyOrdered: 1, costPrice: 0 }]);
       setPaidAmount(0);
+      setPaidAmountInput("");
     },
     onError: (err: any) => {
       alert("Lỗi khi tạo đơn nhập: " + (err?.response?.data?.message || err.message));
@@ -72,6 +82,34 @@ const InboundPage = () => {
     },
   });
 
+  const selectedProvider = providers.find((p) => p._id === providerId);
+
+  const payDebtMutation = useMutation({
+    mutationFn: () =>
+      paymentApi.settleDebt({
+        partyType: "provider",
+        partyId: providerId,
+        amount: parseVndInput(debtPayAmount),
+        method: "cash",
+        note: debtPayNote || `Thanh toán công nợ NCC ${selectedProvider?.name ?? ""}`,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["providers"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      setDebtPayAmount("");
+      setDebtPayNote("");
+      alert("Thanh toán công nợ thành công!");
+    },
+    onError: (err: unknown) => {
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : undefined;
+      alert("Lỗi: " + (message || "Không thể thanh toán công nợ"));
+    },
+  });
+
   // Filter products: Only show products belonging to the selected provider
   const filteredProducts = useMemo(() => {
     if (!providerId) return [];
@@ -88,6 +126,9 @@ const InboundPage = () => {
     setProviderId(newProviderId);
     setItems([{ productId: "", qtyOrdered: 1, costPrice: 0 }]);
     setPaidAmount(0);
+    setPaidAmountInput("");
+    setDebtPayAmount("");
+    setDebtPayNote("");
   };
 
   const updateLine = (index: number, patch: Partial<LineItem>) => {
@@ -158,7 +199,7 @@ const InboundPage = () => {
               <option value="">Chọn NCC</option>
               {providers.map((p) => (
                 <option key={p._id} value={p._id}>
-                  {p.name} {p.debt > 0 ? ` (Nợ: ${p.debt.toLocaleString()}đ)` : ""}
+                  {p.name} {p.debt > 0 ? ` (Nợ: ${formatVnd(p.debt)})` : ""}
                 </option>
               ))}
             </select>
@@ -166,12 +207,16 @@ const InboundPage = () => {
           <label className="block">
             <span className="text-label-sm text-secondary">Đã thanh toán (VNĐ)</span>
             <input
-              type="number"
-              min={0}
-              max={grandTotal}
+              type="text"
+              inputMode="numeric"
               className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
-              value={paidAmount}
-              onChange={(e) => setPaidAmount(Number(e.target.value))}
+              placeholder="0"
+              value={paidAmountInput}
+              onChange={(e) => {
+                const parsed = parseVndInput(e.target.value);
+                setPaidAmount(parsed);
+                setPaidAmountInput(formatVndInput(parsed));
+              }}
             />
           </label>
         </div>
@@ -239,7 +284,7 @@ const InboundPage = () => {
                       readOnly
                       placeholder="Thành tiền"
                       className="w-full rounded-xl border border-surface-container bg-surface-container-low px-sm py-xs text-right font-semibold text-secondary"
-                      value={`${(line.qtyOrdered * line.costPrice).toLocaleString()}đ`}
+                      value={formatVnd(line.qtyOrdered * line.costPrice)}
                     />
                   </div>
                   <div className="col-span-1 text-center">
@@ -267,11 +312,46 @@ const InboundPage = () => {
           )}
         </div>
 
+        {providerId && selectedProvider && selectedProvider.debt > 0 && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-md space-y-sm">
+            <p className="text-label-sm font-semibold text-amber-800">
+              NCC đang nợ: {formatVnd(selectedProvider.debt)} — Thanh toán công nợ
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-sm">
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="Số tiền trả"
+                className="rounded-xl border border-outline-variant px-sm py-xs"
+                value={debtPayAmount}
+                onChange={(e) =>
+                  setDebtPayAmount(formatVndInput(parseVndInput(e.target.value)))
+                }
+              />
+              <input
+                type="text"
+                placeholder="Ghi chú biên lai"
+                className="rounded-xl border border-outline-variant px-sm py-xs md:col-span-2"
+                value={debtPayNote}
+                onChange={(e) => setDebtPayNote(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              disabled={payDebtMutation.isPending || parseVndInput(debtPayAmount) <= 0}
+              onClick={() => payDebtMutation.mutate()}
+              className="rounded-xl bg-amber-600 px-md py-xs text-white font-semibold disabled:opacity-60"
+            >
+              {payDebtMutation.isPending ? "Đang xử lý..." : "Lập biên lai trả nợ"}
+            </button>
+          </div>
+        )}
+
         {providerId && (
           <div className="pt-sm border-t border-surface-container flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
             <p className="text-body-md font-semibold text-primary">
-              Tổng tiền hàng: {grandTotal.toLocaleString()}đ &mdash; Còn nợ NCC:{" "}
-              {Math.max(0, grandTotal - paidAmount).toLocaleString()}đ
+              Tổng tiền hàng: {formatVnd(grandTotal)} &mdash; Còn nợ NCC:{" "}
+              {formatVnd(Math.max(0, grandTotal - paidAmount))}
             </p>
             <button
               type="submit"
@@ -308,9 +388,9 @@ const InboundPage = () => {
                   <td className="px-lg py-sm font-medium">{po.batchCode}</td>
                   <td className="px-lg py-sm">{providerName(po)}</td>
                   <td className="px-lg py-sm">
-                    {po.expectedTotal.toLocaleString()}đ
+                    {formatVnd(po.expectedTotal)}
                   </td>
-                  <td className="px-lg py-sm">{po.debtAmount.toLocaleString()}đ</td>
+                  <td className="px-lg py-sm">{formatVnd(po.debtAmount)}</td>
                   <td className="px-lg py-sm">
                     <span
                       className={`px-sm py-0.5 rounded-full text-label-xs font-semibold ${

@@ -10,6 +10,7 @@ const Sidebar = () => {
     { icon: "inventory_2", link: "/app/inventory", label: "Tồn kho" },
     { icon: "input", link: "/app/po", label: "Nhập kho (PO)" },
     { icon: "output", link: "/app/so", label: "Xuất kho (SO)" },
+    { icon: "storefront", link: "/app/agency", label: "Đại lý" },
     { icon: "groups", link: "/app/providers", label: "Nhà cung cấp" },
     { icon: "analytics", link: "/app/report", label: "Báo cáo" },
   ];

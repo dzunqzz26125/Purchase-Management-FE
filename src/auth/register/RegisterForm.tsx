@@ -25,8 +25,14 @@ const RegisterForm = () => {
         name: String(data.name).trim(),
         email: String(data.email).trim().toLowerCase(),
         password: data.password,
+        phoneNumber: data.phone ? String(data.phone).trim() : undefined,
       });
-      navigate("/login");
+      navigate("/login", {
+        state: {
+          registered: true,
+          email: String(data.email).trim().toLowerCase(),
+        },
+      });
     } catch (error: unknown) {
       setServerError(
         getApiErrorMessage(error, "Đăng ký thất bại. Vui lòng thử lại."),
