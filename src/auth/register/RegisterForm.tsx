@@ -21,12 +21,21 @@ const RegisterForm = () => {
     setServerError("");
     try {
       setLoading(true);
-      await api.post("/auth/register", {
+      const res = await api.post("/auth/register", {
         name: String(data.name).trim(),
         email: String(data.email).trim().toLowerCase(),
         password: data.password,
+        phoneNumber: data.phone ? String(data.phone).trim() : undefined,
       });
-      navigate("/login");
+      const emailVerificationRequired =
+        res?.data?.data?.emailVerificationRequired !== false;
+      navigate("/login", {
+        state: {
+          registered: true,
+          emailVerificationRequired,
+          email: String(data.email).trim().toLowerCase(),
+        },
+      });
     } catch (error: unknown) {
       setServerError(
         getApiErrorMessage(error, "Đăng ký thất bại. Vui lòng thử lại."),

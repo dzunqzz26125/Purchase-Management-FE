@@ -11,6 +11,7 @@ const Sidebar = () => {
     { icon: "input", link: "/app/po", label: "Nhập kho (PO)" },
     { icon: "output", link: "/app/so", label: "Xuất kho (SO)" },
     { icon: "groups", link: "/app/providers", label: "Nhà cung cấp" },
+    { icon: "groups", link: "/app/customers", label: "Khách hàng" },
     { icon: "analytics", link: "/app/report", label: "Báo cáo" },
   ];
 
@@ -61,9 +62,7 @@ const Sidebar = () => {
                 <span
                   className="material-symbols-outlined"
                   style={
-                    isActive
-                      ? { fontVariationSettings: "'FILL' 1" }
-                      : undefined
+                    isActive ? { fontVariationSettings: "'FILL' 1" } : undefined
                   }
                 >
                   {item.icon}

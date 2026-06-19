@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import InputField from "./InputField";
 import PasswordField from "./PasswordField";
 import SocialLogin from "./SocialLogin";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/client";
 import { setAccessToken } from "../../api/client";
@@ -12,18 +12,62 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const verified = searchParams.get("verified") === "true";
+  const registered = (location.state as { registered?: boolean })?.registered;
+  const registeredEmail = (location.state as { email?: string })?.email;
+  const emailVerificationRequired = (
+    location.state as { emailVerificationRequired?: boolean }
+  )?.emailVerificationRequired;
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
   const [serverError, setServerError] = useState("");
+  const [lastEmail, setLastEmail] = useState("");
+
+  const showResend =
+    serverError.includes("chưa được xác nhận") ||
+    serverError.includes("xác nhận kích hoạt");
+
+  const handleResendVerification = async () => {
+    const email =
+      lastEmail ||
+      registeredEmail ||
+      String(watch("email") || "")
+        .trim()
+        .toLowerCase();
+    if (!email) {
+      setResendMessage("Vui lòng nhập email đăng ký trước.");
+      return;
+    }
+    setResending(true);
+    setResendMessage("");
+    try {
+      await api.post("/auth/resend-verification", { email });
+      setResendMessage("Đã gửi lại email xác thực. Vui lòng kiểm tra hộp thư (cả spam).");
+    } catch (error: unknown) {
+      setResendMessage(
+        getApiErrorMessage(error, "Không gửi được email xác thực."),
+      );
+    } finally {
+      setResending(false);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     setServerError("");
+    setResendMessage("");
+    const email = String(data.email).trim().toLowerCase();
+    setLastEmail(email);
     try {
       setLoading(true);
       const res = await api.post("/auth/login", {
-        email: String(data.email).trim().toLowerCase(),
+        email,
         password: data.password,
       });
       const accessToken = res?.data?.data?.accessToken;
@@ -43,9 +87,37 @@ export default function LoginForm() {
         <h2 className="text-h2 mb-xs">Chào mừng trở lại</h2>
 
         <form className="space-y-md" onSubmit={handleSubmit(onSubmit)}>
+          {registered && (
+            <div className="p-sm bg-primary-container text-on-primary-container rounded-xl text-label-sm font-medium">
+              Đăng ký thành công{registeredEmail ? ` với ${registeredEmail}` : ""}!
+              {emailVerificationRequired !== false
+                ? " Vui lòng kiểm tra email (cả thư spam) và bấm link xác thực trước khi đăng nhập."
+                : " Bạn có thể đăng nhập ngay bây giờ."}
+            </div>
+          )}
+          {verified && (
+            <div className="p-sm bg-primary-container text-on-primary-container rounded-xl text-label-sm font-medium">
+              Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.
+            </div>
+          )}
           {serverError && (
-            <div className="p-sm bg-error-container text-on-error-container rounded-xl text-label-sm font-medium">
-              {serverError}
+            <div className="p-sm bg-error-container text-on-error-container rounded-xl text-label-sm font-medium space-y-sm">
+              <p>{serverError}</p>
+              {showResend && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resending}
+                  className="text-primary font-semibold underline underline-offset-2 disabled:opacity-60"
+                >
+                  {resending ? "Đang gửi lại..." : "Gửi lại email xác thực"}
+                </button>
+              )}
+            </div>
+          )}
+          {resendMessage && (
+            <div className="p-sm bg-primary-container text-on-primary-container rounded-xl text-label-sm font-medium">
+              {resendMessage}
             </div>
           )}
           <InputField

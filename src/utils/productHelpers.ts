@@ -35,22 +35,23 @@ export const getCategoryName = (
   product: Product,
   categories: Category[],
 ): string => {
-  // case 1: backend đã populate
-  if (typeof product.categoryId === "object" && product.categoryId?.name) {
+  if (
+    product.categoryId &&
+    typeof product.categoryId === "object" &&
+    product.categoryId?.name
+  ) {
     return product.categoryId.name;
   }
-
-  // case 2: chỉ có ID → map sang categories
   const category = categories.find((c) => c._id === product.categoryId);
 
   return category?.name || "—";
 };
 
 export const getCategoryId = (product: Product): string => {
-  if (typeof product.categoryId === "object") {
+  if (product.categoryId && typeof product.categoryId === "object") {
     return product.categoryId._id;
   }
-  return product.categoryId;
+  return product.categoryId as string;
 };
 
 export const getStockStatus = (

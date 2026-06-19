@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import type { Provider, ProviderFormValues } from "../../types/provider";
 import { providerToFormValues } from "../../utils/providerHelpers";
+import VndInput from "../../components/UI/VndInput";
+import { parseVndInput } from "../../utils/formatVnd";
 
 type ProviderFormModalProps = {
   open: boolean;
@@ -38,6 +40,7 @@ export default function ProviderFormModal({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<ProviderFormValues>({ defaultValues });
 
@@ -53,7 +56,11 @@ export default function ProviderFormModal({
   if (!open) return null;
 
   const submit = handleSubmit(async (values) => {
-    await onSubmit(values);
+    const processedValues = {
+      ...values,
+      debt: String(parseVndInput(String(values.debt))),
+    };
+    await onSubmit(processedValues);
   });
 
   return (
@@ -141,20 +148,21 @@ export default function ProviderFormModal({
             </div>
 
             <div className="space-y-xs">
-              <label className={labelClass}>Công nợ</label>
-              <input
-                type="number"
-                className={fieldClass}
-                placeholder="0"
-                {...register("debt", {
-                  min: { value: 0, message: "Số tiền không hợp lệ" },
-                })}
+              <label className={labelClass}>Công nợ (VNĐ)</label>
+              <Controller
+                name="debt"
+                control={control}
+                render={({ field }) => (
+                  <VndInput
+                    className={fieldClass}
+                    value={parseVndInput(String(field.value ?? "0"))}
+                    onChange={(val) => field.onChange(String(val))}
+                  />
+                )}
               />
-              {errors.debt && (
-                <p className="text-error text-label-xs">
-                  {errors.debt.message}
-                </p>
-              )}
+              <p className="text-label-xs text-secondary">
+                Công nợ từ đơn nhập kho được cộng tự động; bạn có thể chỉnh tay tại đây.
+              </p>
             </div>
 
             <div className="space-y-xs md:col-span-2">

@@ -1,4 +1,5 @@
 import type { Provider } from "../../../types/provider";
+import { formatVnd } from "../../../utils/formatVnd";
 
 type ProviderTableProps = {
   data: Provider[];
@@ -65,7 +66,7 @@ const ProviderTable = ({
                         item.debt > 0 ? "text-error" : "text-emerald-600"
                       }`}
                     >
-                      {item.debt.toLocaleString()}đ
+                      {formatVnd(Number(item.debt) || 0)}
                     </span>
                   </td>
                   <td className="px-md py-md text-right">

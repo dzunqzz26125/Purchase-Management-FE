@@ -9,6 +9,7 @@ type ModalState = {
 type AppState = {
   productModal: ModalState;
   providerModal: ModalState;
+  customerModal: ModalState;
   categoryFilter: string;
   statusFilter: string;
   poSelectedId: string | null;
@@ -17,6 +18,8 @@ type AppState = {
   closeProductModal: () => void;
   openProviderModal: (mode?: "create" | "edit", id?: string | null) => void;
   closeProviderModal: () => void;
+  openCustomerModal: (mode?: "create" | "edit", id?: string | null) => void;
+  closeCustomerModal: () => void;
   setCategoryFilter: (value: string) => void;
   setStatusFilter: (value: string) => void;
   setPoSelectedId: (id: string | null) => void;
@@ -32,6 +35,7 @@ const defaultModal = (): ModalState => ({
 export const useAppStore = create<AppState>((set) => ({
   productModal: defaultModal(),
   providerModal: defaultModal(),
+  customerModal: defaultModal(),
   categoryFilter: "",
   statusFilter: "",
   poSelectedId: null,
@@ -42,6 +46,9 @@ export const useAppStore = create<AppState>((set) => ({
   openProviderModal: (mode = "create", id = null) =>
     set({ providerModal: { open: true, mode, resourceId: id } }),
   closeProviderModal: () => set({ providerModal: defaultModal() }),
+  openCustomerModal: (mode = "create", id = null) =>
+    set({ customerModal: { open: true, mode, resourceId: id } }),
+  closeCustomerModal: () => set({ customerModal: defaultModal() }),
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   setPoSelectedId: (poSelectedId) => set({ poSelectedId }),

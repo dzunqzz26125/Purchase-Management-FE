@@ -5,6 +5,8 @@ import { productApi } from "../api/productApi";
 import type { Product } from "../types/product";
 import { salesOrderApi, type CreateSOInput } from "../api/salesOrderApi";
 import InvoiceModal from "../components/client/InvoiceModal";
+import { formatVnd } from "../utils/formatVnd";
+import VndInput from "../components/UI/VndInput";
 
 type LineItem = { productId: string; qty: number; price: number };
 
@@ -13,7 +15,9 @@ const OutboundPage = () => {
   const [customerId, setCustomerId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer">(
+    "cash",
+  );
   const [paidAmount, setPaidAmount] = useState(0);
   const [items, setItems] = useState<LineItem[]>([
     { productId: "", qty: 1, price: 0 },
@@ -29,7 +33,7 @@ const OutboundPage = () => {
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products", "list"],
-    queryFn: productApi.list,
+    queryFn: () => productApi.list(),
   });
 
   const { data: orders = [], isLoading } = useQuery({
@@ -47,7 +51,9 @@ const OutboundPage = () => {
       setPaidAmount(0);
     },
     onError: (err: any) => {
-      alert("Lỗi khi tạo đơn bán: " + (err?.response?.data?.message || err.message));
+      alert(
+        "Lỗi khi tạo đơn bán: " + (err?.response?.data?.message || err.message),
+      );
     },
   });
 
@@ -112,7 +118,9 @@ const OutboundPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
           <label className="block">
-            <span className="text-label-sm text-secondary">Khách hàng (đã có)</span>
+            <span className="text-label-sm text-secondary">
+              Khách hàng (đã có)
+            </span>
             <select
               className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs bg-white"
               value={customerId}
@@ -121,7 +129,7 @@ const OutboundPage = () => {
               <option value="">Khách lẻ / nhập tay</option>
               {customers.map((c) => (
                 <option key={c._id} value={c._id}>
-                  {c.name} {c.debt > 0 ? `(Nợ: ${c.debt.toLocaleString()}đ)` : ""}
+                  {c.name} {c.debt > 0 ? `(Nợ: ${formatVnd(c.debt)})` : ""}
                 </option>
               ))}
             </select>
@@ -164,19 +172,18 @@ const OutboundPage = () => {
           </label>
           <label className="block">
             <span className="text-label-sm text-secondary">Đã thu (VNĐ)</span>
-            <input
-              type="number"
-              min={0}
-              max={grandTotal}
+            <VndInput
               className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
               value={paidAmount}
-              onChange={(e) => setPaidAmount(Number(e.target.value))}
+              onChange={setPaidAmount}
             />
           </label>
         </div>
 
         <div className="space-y-sm">
-          <label className="block text-label-sm text-secondary font-medium">Danh sách sản phẩm bán</label>
+          <label className="block text-label-sm text-secondary font-medium">
+            Danh sách sản phẩm bán
+          </label>
           <div className="space-y-xs">
             {items.map((line, idx) => (
               <div key={idx} className="grid grid-cols-12 gap-sm items-center">
@@ -185,7 +192,9 @@ const OutboundPage = () => {
                     className="w-full rounded-xl border border-outline-variant px-sm py-xs bg-white"
                     value={line.productId}
                     onChange={(e) => {
-                      const product = products.find((p) => p._id === e.target.value);
+                      const product = products.find(
+                        (p) => p._id === e.target.value,
+                      );
                       updateLine(idx, {
                         productId: e.target.value,
                         price: product?.sellPrice ?? line.price,
@@ -207,20 +216,16 @@ const OutboundPage = () => {
                     min={1}
                     className="w-full rounded-xl border border-outline-variant px-sm py-xs"
                     value={line.qty}
-                    onChange={(e) => updateLine(idx, { qty: Number(e.target.value) })}
+                    onChange={(e) =>
+                      updateLine(idx, { qty: Number(e.target.value) })
+                    }
                     required
                   />
                 </div>
                 <div className="col-span-2">
-                  <input
-                    type="number"
-                    min={0}
-                    className="w-full rounded-xl border border-outline-variant px-sm py-xs"
+                  <VndInput
                     value={line.price}
-                    onChange={(e) =>
-                      updateLine(idx, { price: Number(e.target.value) })
-                    }
-                    required
+                    onChange={(val) => updateLine(idx, { price: val })}
                   />
                 </div>
                 <div className="col-span-2">
@@ -229,7 +234,7 @@ const OutboundPage = () => {
                     readOnly
                     placeholder="Thành tiền"
                     className="w-full rounded-xl border border-surface-container bg-surface-container-low px-sm py-xs text-right font-semibold text-secondary"
-                    value={`${(line.qty * line.price).toLocaleString()}đ`}
+                    value={formatVnd(line.qty * line.price)}
                   />
                 </div>
                 <div className="col-span-1 text-center">
@@ -240,7 +245,9 @@ const OutboundPage = () => {
                     className="p-xs text-secondary hover:text-error disabled:opacity-40 cursor-pointer"
                     title="Xóa dòng"
                   >
-                    <span className="material-symbols-outlined text-[20px] block">delete</span>
+                    <span className="material-symbols-outlined text-[20px] block">
+                      delete
+                    </span>
                   </button>
                 </div>
               </div>
@@ -258,15 +265,17 @@ const OutboundPage = () => {
 
         <div className="pt-sm border-t border-surface-container flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
           <p className="text-body-md font-semibold text-primary">
-            Tổng: {grandTotal.toLocaleString()}đ &mdash; Còn nợ KH:{" "}
-            {Math.max(0, grandTotal - paidAmount).toLocaleString()}đ
+            Tổng: {formatVnd(grandTotal)} &mdash; Khách còn nợ:{" "}
+            {formatVnd(Math.max(0, grandTotal - paidAmount))}
           </p>
           <button
             type="submit"
             disabled={createMutation.isPending}
             className="rounded-xl bg-primary px-lg py-sm text-on-primary font-semibold disabled:opacity-60 cursor-pointer active:scale-95 transition-all"
           >
-            {createMutation.isPending ? "Đang tạo..." : "Tạo đơn bán & xuất kho"}
+            {createMutation.isPending
+              ? "Đang tạo..."
+              : "Tạo đơn bán & xuất kho"}
           </button>
         </div>
       </form>
@@ -291,27 +300,28 @@ const OutboundPage = () => {
             </thead>
             <tbody>
               {orders.map((so) => (
-                <tr key={so._id} className="border-t border-surface-container hover:bg-surface-container-low/10">
+                <tr
+                  key={so._id}
+                  className="border-t border-surface-container hover:bg-surface-container-low/10"
+                >
                   <td className="px-lg py-sm font-medium">{so.orderCode}</td>
                   <td className="px-lg py-sm">{so.customerName || "—"}</td>
-                  <td className="px-lg py-sm">
-                    {so.grandTotal.toLocaleString()}đ
-                  </td>
+                  <td className="px-lg py-sm">{formatVnd(so.grandTotal)}</td>
                   <td className="px-lg py-sm">
                     <span
                       className={`px-sm py-0.5 rounded-full text-label-xs font-semibold ${
                         so.paymentStatus === "paid"
                           ? "bg-emerald-100 text-emerald-700"
                           : so.paymentStatus === "partial"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-error-container/40 text-error"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-error-container/40 text-error"
                       }`}
                     >
                       {so.paymentStatus === "paid"
                         ? "Đã thu đủ"
                         : so.paymentStatus === "partial"
-                        ? "Thu một phần"
-                        : "Chưa thanh toán"}
+                          ? "Thu một phần"
+                          : "Chưa thanh toán"}
                     </span>
                   </td>
                   <td className="px-lg py-sm">
@@ -325,7 +335,9 @@ const OutboundPage = () => {
                       onClick={() => handleShowInvoice(so)}
                       className="text-primary font-semibold hover:underline cursor-pointer flex items-center justify-end gap-0.5 ml-auto"
                     >
-                      <span className="material-symbols-outlined text-[16px]">print</span>
+                      <span className="material-symbols-outlined text-[16px]">
+                        print
+                      </span>
                       Hóa đơn
                     </button>
                   </td>

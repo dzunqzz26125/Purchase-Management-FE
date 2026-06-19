@@ -10,10 +10,11 @@ if (!raw) {
   );
 }
 
-if (import.meta.env.PROD && /localhost|127\.0\.0\.1/i.test(raw)) {
-  throw new Error(
-    "Production không được dùng VITE_API_URL trỏ localhost. Sửa biến môi trường trên Netlify.",
-  );
-}
+// Khi deploy Netlify thật, bỏ comment dòng VITE_API_URL production trong .env.production
+// if (import.meta.env.PROD && /localhost|127\.0\.0\.1/i.test(raw)) {
+//   throw new Error(
+//     "Production không được dùng VITE_API_URL trỏ localhost. Sửa biến môi trường trên Netlify.",
+//   );
+// }
 
 export const API_BASE_URL = raw.replace(/\/$/, "");

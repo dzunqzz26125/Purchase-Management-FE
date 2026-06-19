@@ -124,20 +124,19 @@
   box-shadow: 0 10px 30px -5px rgba(30, 58, 138, 0.05);
 }
 
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #invoice-print-area, #invoice-print-area * {
-    visibility: visible;
-  }
-  #invoice-print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: white;
-    color: black;
-    padding: 24px;
-  }
+/* Hóa đơn in / PDF — style tường minh, không dùng visibility:hidden toàn trang */
+.invoice-print-area {
+  background: #ffffff;
+  color: #111827;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+
+.invoice-print-area,
+.invoice-print-area * {
+  visibility: visible;
+}
+
+.invoice-print-document {
+  background: #ffffff;
+  color: #111827;
 }
