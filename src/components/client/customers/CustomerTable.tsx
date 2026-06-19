@@ -1,4 +1,5 @@
 import type { Customer } from "../../../types/customer";
+import { formatVnd } from "../../../utils/formatVnd";
 
 type CustomerTableProps = {
   data: Customer[];
@@ -65,7 +66,7 @@ const CustomerTable = ({
                         item.debt > 0 ? "text-error" : "text-emerald-600"
                       }`}
                     >
-                      {item.debt.toLocaleString()}đ
+                      {formatVnd(item.debt)}
                     </span>
                   </td>
                   <td className="px-md py-md text-right">

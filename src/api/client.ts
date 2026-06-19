@@ -28,6 +28,20 @@ export const clearAccessToken = () => {
   localStorage.removeItem("accessToken");
 };
 
+const PUBLIC_AUTH_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/resend-verification",
+  "/auth/verify",
+];
+
+const isPublicAuthRequest = (url: string) => {
+  const path = url.replace(/^https?:\/\/[^/]+/i, "").split("?")[0];
+  return PUBLIC_AUTH_PATHS.some(
+    (p) => path === p || path.endsWith(p),
+  );
+};
+
 api.interceptors.request.use((config) => {
   config.baseURL = API_BASE_URL;
 
@@ -41,8 +55,15 @@ api.interceptors.request.use((config) => {
     config.url = `/${url}`;
   }
 
-  const token = getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const requestPath = config.url ?? "";
+
+  // Không gửi token cũ/hết hạn cho đăng ký, đăng nhập, gửi lại email xác thực
+  if (isPublicAuthRequest(requestPath)) {
+    delete config.headers.Authorization;
+  } else {
+    const token = getAccessToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
 
   return config;
 });

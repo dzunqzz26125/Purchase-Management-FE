@@ -1,2 +1,2 @@
-/** @deprecated Use `src/api/productApi` */
-export { productApi as productService, categoryApi } from "../api/productApi";
+export { productApi as productService } from "../api/productApi";
+export { categoryApi } from "../api/categoryApi";

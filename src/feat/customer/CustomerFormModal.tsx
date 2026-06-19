@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { Customer, CustomerFormValues } from "../../types/customer";
 import { customerToFormValues } from "../../utils/customerHelpers";
+import VndInput from "../../components/UI/VndInput";
+import { parseVndInput } from "../../utils/formatVnd";
 
 type CustomerFormModalProps = {
   open: boolean;
@@ -38,6 +40,8 @@ export default function CustomerFormModal({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CustomerFormValues>({ defaultValues });
 
@@ -50,10 +54,20 @@ export default function CustomerFormModal({
     }
   }, [open, mode, customer, reset]);
 
+  useEffect(() => {
+    register("debt", {
+      min: { value: 0, message: "Số tiền không hợp lệ" },
+    });
+  }, [register]);
+
   if (!open) return null;
 
   const submit = handleSubmit(async (values) => {
-    await onSubmit(values);
+    const processedValues = {
+      ...values,
+      debt: String(parseVndInput(String(values.debt))),
+    };
+    await onSubmit(processedValues);
   });
 
   return (
@@ -124,14 +138,12 @@ export default function CustomerFormModal({
 
             <div className="space-y-xs">
               <label className={labelClass}>Công nợ (KH nợ kho)</label>
-              <input
-                type="number"
-                min={0}
+              <VndInput
                 className={fieldClass}
-                placeholder="0"
-                {...register("debt", {
-                  min: { value: 0, message: "Số tiền không hợp lệ" },
-                })}
+                value={parseVndInput(String(watch("debt") ?? "0"))}
+                onChange={(val) =>
+                  setValue("debt", String(val), { shouldValidate: true })
+                }
               />
             </div>
 

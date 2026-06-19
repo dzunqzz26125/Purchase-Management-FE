@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import type { Category, Product, ProductFormValues } from "../../types/product";
 import { productToFormValues } from "../../utils/productHelpers";
 import { providerApi } from "../../api/providerApi";
+import VndInput from "../../components/UI/VndInput";
 
 type ProductFormModalProps = {
   open: boolean;
@@ -45,6 +46,7 @@ export default function ProductFormModal({
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormValues>({ defaultValues });
 
@@ -56,6 +58,17 @@ export default function ProductFormModal({
       reset(defaultValues);
     }
   }, [open, mode, product, reset]);
+
+  useEffect(() => {
+    register("costPrice", {
+      required: "Vui lòng nhập giá vốn",
+      min: { value: 0, message: "Giá vốn phải >= 0" },
+    });
+    register("sellPrice", {
+      required: "Vui lòng nhập giá bán",
+      min: { value: 0, message: "Giá bán phải >= 0" },
+    });
+  }, [register]);
 
   const selectedCategoryId = watch("categoryId");
   const selectedCat = categories.find((c) => c._id === selectedCategoryId);
@@ -166,15 +179,12 @@ export default function ProductFormModal({
 
             <div className="space-y-xs">
               <label className={labelClass}>Giá vốn (VND) *</label>
-              <input
-                type="number"
-                min={0}
+              <VndInput
                 className={fieldClass}
-                {...register("costPrice", {
-                  required: "Vui lòng nhập giá vốn",
-                  min: { value: 0, message: "Giá vốn phải >= 0" },
-                  valueAsNumber: true,
-                })}
+                value={watch("costPrice") ?? 0}
+                onChange={(val) =>
+                  setValue("costPrice", val, { shouldValidate: true })
+                }
               />
               {errors.costPrice && (
                 <p className="text-error text-label-xs">
@@ -185,15 +195,12 @@ export default function ProductFormModal({
 
             <div className="space-y-xs">
               <label className={labelClass}>Giá bán (VND) *</label>
-              <input
-                type="number"
-                min={0}
+              <VndInput
                 className={fieldClass}
-                {...register("sellPrice", {
-                  required: "Vui lòng nhập giá bán",
-                  min: { value: 0, message: "Giá bán phải >= 0" },
-                  valueAsNumber: true,
-                })}
+                value={watch("sellPrice") ?? 0}
+                onChange={(val) =>
+                  setValue("sellPrice", val, { shouldValidate: true })
+                }
               />
               {errors.sellPrice && (
                 <p className="text-error text-label-xs">

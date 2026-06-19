@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "../api/analyticsApi";
+import { formatVnd } from "../utils/formatVnd";
 
 const ReportPage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["analytics", "dashboard"],
-    queryFn: analyticsApi.dashboard,
+    queryFn: () => analyticsApi.dashboard(),
   });
 
   if (isLoading) {
@@ -21,13 +22,13 @@ const ReportPage = () => {
         <article className="rounded-2xl border border-surface-container bg-surface-bright p-lg">
           <h2 className="text-label-sm text-secondary">Doanh thu tháng</h2>
           <p className="text-h2 font-bold text-primary mt-sm">
-            {(s?.monthlyRevenue ?? 0).toLocaleString()}đ
+            {formatVnd(s?.monthlyRevenue ?? 0)}
           </p>
         </article>
         <article className="rounded-2xl border border-surface-container bg-surface-bright p-lg">
           <h2 className="text-label-sm text-secondary">Đã thu</h2>
           <p className="text-h2 font-bold text-emerald-700 mt-sm">
-            {(s?.monthlyCollected ?? 0).toLocaleString()}đ
+            {formatVnd(s?.monthlyCollected ?? 0)}
           </p>
         </article>
         <article className="rounded-2xl border border-surface-container bg-surface-bright p-lg">
@@ -44,13 +45,13 @@ const ReportPage = () => {
           <div className="p-md rounded-xl bg-error-container/15">
             <p className="text-label-sm text-secondary">Công nợ phải trả (NCC)</p>
             <p className="text-h3 font-bold text-error">
-              {(data?.debtReport.payables ?? 0).toLocaleString()}đ
+              {formatVnd(data?.debtReport.payables ?? 0)}
             </p>
           </div>
           <div className="p-md rounded-xl bg-emerald-50">
             <p className="text-label-sm text-secondary">Công nợ phải thu (KH)</p>
             <p className="text-h3 font-bold text-emerald-700">
-              {(data?.debtReport.receivables ?? 0).toLocaleString()}đ
+              {formatVnd(data?.debtReport.receivables ?? 0)}
             </p>
           </div>
         </div>
@@ -72,7 +73,7 @@ const ReportPage = () => {
                 <td className="py-sm">{p.name || p.sku}</td>
                 <td className="py-sm text-right">{p.totalQty}</td>
                 <td className="py-sm text-right font-semibold">
-                  {p.revenue.toLocaleString()}đ
+                  {formatVnd(p.revenue)}
                 </td>
               </tr>
             ))}

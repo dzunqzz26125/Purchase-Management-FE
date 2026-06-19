@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../api/client";
 
+export interface AgencyProfile {
+  _id: string;
+  name: string;
+  phone?: string;
+  address?: string;
+}
+
 export interface UserProfile {
   _id: string;
   name: string;
@@ -11,6 +18,7 @@ export interface UserProfile {
   isBlocked: boolean;
   createdAt: string;
   updatedAt: string;
+  agency?: AgencyProfile;
 }
 
 export interface UpdateProfileInput {

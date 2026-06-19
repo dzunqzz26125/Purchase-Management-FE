@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import MetricCard from "../components/client/Dashboard/MetricCard";
 import { analyticsApi } from "../api/analyticsApi";
+import { formatVnd } from "../utils/formatVnd";
 
 const Dashboard = () => {
   const [filterType, setFilterType] = useState<"today" | "7days" | "month" | "custom">("month");
@@ -217,7 +218,7 @@ const Dashboard = () => {
             />
             <MetricCard
               title="Doanh thu Bán hàng"
-              value={`${(s?.periodRevenue ?? 0).toLocaleString()}đ`}
+              value={formatVnd(s?.periodRevenue ?? 0)}
               icon="payments"
               iconWrapperClassName="bg-secondary-fixed"
               iconClassName="text-secondary"
@@ -226,7 +227,7 @@ const Dashboard = () => {
             />
             <MetricCard
               title="Đã thu từ Khách hàng"
-              value={`${(s?.periodCollected ?? 0).toLocaleString()}đ`}
+              value={formatVnd(s?.periodCollected ?? 0)}
               icon="bolt"
               iconWrapperClassName="bg-tertiary-fixed"
               iconClassName="text-tertiary"
@@ -235,7 +236,7 @@ const Dashboard = () => {
             />
             <MetricCard
               title="Tổng nhập từ NCC"
-              value={`${(s?.periodImported ?? 0).toLocaleString()}đ`}
+              value={formatVnd(s?.periodImported ?? 0)}
               icon="inventory_2"
               iconWrapperClassName="bg-indigo-100"
               iconClassName="text-indigo-700"
@@ -244,7 +245,7 @@ const Dashboard = () => {
             />
             <MetricCard
               title="Đã trả Nhà cung cấp"
-              value={`${(s?.periodPaidToProviders ?? 0).toLocaleString()}đ`}
+              value={formatVnd(s?.periodPaidToProviders ?? 0)}
               icon="account_balance_wallet"
               iconWrapperClassName="bg-teal-100"
               iconClassName="text-teal-700"
@@ -266,7 +267,7 @@ const Dashboard = () => {
                     >
                       <span className="truncate pr-xs font-medium text-on-surface">{p.name || p.sku || "—"}</span>
                       <span className="font-semibold text-primary shrink-0">
-                        {p.revenue.toLocaleString()}đ ({p.totalQty} sp)
+                        {formatVnd(p.revenue)} ({p.totalQty} sp)
                       </span>
                     </li>
                   ))}
@@ -287,7 +288,7 @@ const Dashboard = () => {
                       <span className="text-label-sm font-medium">Phải trả NCC (Tổng nợ NCC)</span>
                     </div>
                     <span className="font-bold text-error text-body-lg">
-                      {(data?.debtReport.payables ?? 0).toLocaleString()}đ
+                      {formatVnd(data?.debtReport.payables ?? 0)}
                     </span>
                   </div>
                   <div className="flex justify-between p-md rounded-xl bg-emerald-50 border border-emerald-100">
@@ -296,7 +297,7 @@ const Dashboard = () => {
                       <span className="text-label-sm font-medium">Phải thu Khách hàng (KH nợ)</span>
                     </div>
                     <span className="font-bold text-emerald-700 text-body-lg">
-                      {(data?.debtReport.receivables ?? 0).toLocaleString()}đ
+                      {formatVnd(data?.debtReport.receivables ?? 0)}
                     </span>
                   </div>
                 </div>

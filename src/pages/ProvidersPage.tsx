@@ -2,26 +2,21 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ProviderTable from "../components/client/providers/ProviderTable";
 import CustomerTable from "../components/client/customers/CustomerTable";
-import ProviderFormModal from "../feat/provider/ProviderFormModal";
+import ProviderFormModal from "../feat/providers/ProviderFormModal";
 import CustomerFormModal from "../feat/customer/CustomerFormModal";
-import { paymentApi } from "../api/paymentApi";
-import { providerApi } from "../api/providerApi";
+import DebtSettlementForm from "../feat/providers/DebtSettlementForm";
 import { customerApi } from "../api/customerApi";
 import { useCrud } from "../hooks/useCrud";
 import { useAppStore } from "../store/useAppStore";
 import type { Provider, ProviderFormValues } from "../types/provider";
 import type { CustomerFormValues } from "../types/customer";
+import { providerApi } from "../api/providerApi";
 
 const ProvidersPage = () => {
   const queryClient = useQueryClient();
   const { providerModal, openProviderModal, closeProviderModal } =
     useAppStore();
 
-  const [partyType, setPartyType] = useState<"provider" | "customer">(
-    "provider",
-  );
-  const [partyId, setPartyId] = useState("");
-  const [amount, setAmount] = useState(0);
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [customerModalMode, setCustomerModalMode] = useState<"create" | "edit">(
     "create",
@@ -63,13 +58,8 @@ const ProvidersPage = () => {
   });
 
   const updateCustomerMutation = useMutation({
-    mutationFn: ({
-      id,
-      values,
-    }: {
-      id: string;
-      values: CustomerFormValues;
-    }) => customerApi.update(id, values),
+    mutationFn: ({ id, values }: { id: string; values: CustomerFormValues }) =>
+      customerApi.update(id, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       setCustomerModalOpen(false);
@@ -80,16 +70,6 @@ const ProvidersPage = () => {
     mutationFn: customerApi.remove,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-    },
-  });
-
-  const payMutation = useMutation({
-    mutationFn: paymentApi.settleDebt,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["analytics"] });
-      setAmount(0);
     },
   });
 
@@ -142,8 +122,6 @@ const ProvidersPage = () => {
     await refetchCustomers();
   };
 
-  const parties = partyType === "provider" ? providers : customers;
-
   return (
     <div className="space-y-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md">
@@ -179,105 +157,7 @@ const ProvidersPage = () => {
         onSubmit={handleFormSubmit}
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md pt-md">
-        <div>
-          <h2 className="text-h3 text-primary">Khách hàng</h2>
-          <p className="text-secondary text-body-md mt-xs">
-            Quản lý danh sách khách hàng và công nợ
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => openCustomerModal("create")}
-          className="px-md py-sm cursor-pointer bg-secondary text-on-secondary font-label-sm rounded-xl flex items-center justify-center gap-xs shadow-md active:scale-95 transition-all shrink-0"
-        >
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
-          Thêm khách hàng
-        </button>
-      </div>
-
-      <CustomerTable
-        data={customers}
-        loading={customersLoading}
-        onEdit={(id) => openCustomerModal("edit", id)}
-        onDelete={handleDeleteCustomer}
-      />
-
-      <CustomerFormModal
-        open={customerModalOpen}
-        mode={customerModalMode}
-        customer={editingCustomer}
-        loading={
-          createCustomerMutation.isPending || updateCustomerMutation.isPending
-        }
-        onClose={() => setCustomerModalOpen(false)}
-        onSubmit={handleCustomerSubmit}
-      />
-
-      <section className="rounded-2xl border border-surface-container bg-surface-bright p-lg space-y-md">
-        <h2 className="font-semibold text-primary">Thanh toán công nợ</h2>
-        <form
-          className="space-y-md"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await payMutation.mutateAsync({
-              partyType,
-              partyId,
-              amount,
-              method: "cash",
-            });
-          }}
-        >
-          <label className="block">
-            <span className="text-label-sm text-secondary">Loại</span>
-            <select
-              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
-              value={partyType}
-              onChange={(e) => {
-                setPartyType(e.target.value as "provider" | "customer");
-                setPartyId("");
-              }}
-            >
-              <option value="provider">Trả NCC</option>
-              <option value="customer">Thu từ KH</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-label-sm text-secondary">Đối tác</span>
-            <select
-              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
-              value={partyId}
-              onChange={(e) => setPartyId(e.target.value)}
-              required
-            >
-              <option value="">Chọn</option>
-              {parties.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name} — Nợ: {p.debt.toLocaleString()}đ
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-label-sm text-secondary">Số tiền</span>
-            <input
-              type="number"
-              min={1}
-              className="mt-xs w-full rounded-xl border border-outline-variant px-sm py-xs"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              required
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={payMutation.isPending}
-            className="w-full rounded-xl bg-secondary py-sm text-on-secondary font-semibold"
-          >
-            {payMutation.isPending ? "Đang xử lý..." : "Xác nhận thanh toán"}
-          </button>
-        </form>
-      </section>
+      <DebtSettlementForm providers={providers} customers={customers} />
     </div>
   );
 };

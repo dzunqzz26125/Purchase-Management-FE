@@ -25,7 +25,12 @@ const toPayload = (values: ProductFormValues) => {
 };
 
 export const productApi = {
-  list: async (): Promise<Product[]> => unwrap(await api.get("/products")),
+  list: async (params?: { providerId?: string }): Promise<Product[]> => {
+    const query = params?.providerId
+      ? `?providerId=${encodeURIComponent(params.providerId)}`
+      : "";
+    return unwrap(await api.get(`/products${query}`));
+  },
   getById: async (id: string): Promise<Product> =>
     unwrap(await api.get(`/products/${id}`)),
   create: async (values: ProductFormValues): Promise<Product> =>

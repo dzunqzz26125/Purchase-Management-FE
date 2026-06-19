@@ -1,7 +1,10 @@
 import api from "./client";
 import { unwrap } from "./types";
 import type { Provider, ProviderFormValues } from "../types/provider";
-import { toProviderPayload } from "../utils/providerHelpers";
+import {
+  toProviderPayload,
+  toProviderUpdatePayload,
+} from "../utils/providerHelpers";
 
 export type { Provider, ProviderFormValues };
 
@@ -13,7 +16,12 @@ export const providerApi = {
     id: string,
     values: Partial<ProviderFormValues>,
   ): Promise<Provider> =>
-    unwrap(await api.patch(`/providers/${id}`, toProviderPayload(values as ProviderFormValues))),
+    unwrap(
+      await api.patch(
+        `/providers/${id}`,
+        toProviderUpdatePayload(values as ProviderFormValues),
+      ),
+    ),
   remove: async (id: string): Promise<void> => {
     await api.delete(`/providers/${id}`);
   },

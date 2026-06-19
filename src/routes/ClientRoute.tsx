@@ -1,4 +1,8 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import IntroducePage from "../pages/introducePage";
 import ProtectedRoute from "./ProtectedRoute";
 import Signup from "../pages/RegisterPage";
@@ -10,8 +14,8 @@ import InboundPage from "../pages/PO-Page";
 import OutboundPage from "../pages/SO-Page";
 import ReportPage from "../pages/ReportPage";
 import ProvidersPage from "../pages/ProvidersPage";
-import AgencyPage from "../pages/AgencyPage";
-
+import CustomerPage from "../pages/CustomerPage";
+import InvoiceViewPage from "../pages/InvoiceViewPage";
 const routes = createBrowserRouter([
   { path: "/", element: <IntroducePage /> },
   {
@@ -28,8 +32,9 @@ const routes = createBrowserRouter([
       { path: "po", element: <InboundPage /> },
       { path: "so", element: <OutboundPage /> },
       { path: "providers", element: <ProvidersPage /> },
-      { path: "agency", element: <AgencyPage /> },
+      { path: "customers", element: <CustomerPage /> },
       { path: "report", element: <ReportPage /> },
+      { path: "invoices/:type/:id", element: <InvoiceViewPage /> },
     ],
   },
   { path: "/register", element: <Signup /> },
